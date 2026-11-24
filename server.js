@@ -322,6 +322,28 @@ app.get('/api/state', requireAuth, (req, res) => {
   });
 });
 
+// Full game history (video-style table, paginated) — reads ALL history from
+// Postgres (never deleted), falls back to the in-memory window when PG is down.
+app.get('/api/history', requireAuth, async (req, res) => {
+  const mode = req.query.mode === '1min' ? '1min' : '30s';
+  const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 10));
+  const page = Math.max(1, Number(req.query.page) || 1);
+  const offset = (page - 1) * limit;
+  if (PG_OK) {
+    try {
+      const totalRes = await pool.query('SELECT COUNT(*)::int AS c FROM pz_history WHERE mode=$1', [mode]);
+      const rowsRes = await pool.query('SELECT period, number, color FROM pz_history WHERE mode=$1 ORDER BY period DESC LIMIT $2 OFFSET $3', [mode, limit, offset]);
+      const total = totalRes.rows[0].c;
+      return res.json({ rows: rowsRes.rows.map((r) => ({ period: Number(r.period), number: Number(r.number), color: r.color })), page, limit, total, pages: Math.max(1, Math.ceil(total / limit)) });
+    } catch (e) {
+      console.error('[PG] history query failed, using memory:', e.message);
+    }
+  }
+  const arr = mode === '1min' ? (db.history1m || []) : db.history;
+  const total = arr.length;
+  res.json({ rows: arr.slice(offset, offset + limit), page, limit, total, pages: Math.max(1, Math.ceil(total / limit)) });
+});
+
 app.post('/api/bet', requireAuth, (req, res) => {
   const { type, choice, amount } = req.body;
   const betAmount = Number(amount);
