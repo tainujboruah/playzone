@@ -36,6 +36,9 @@
     .dot { display: inline-block; width: 11px; height: 11px; border-radius: 50%; }
     .tab-page { display: none; }
     .tab-page.active { display: block; }
+    .mode-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+    .mode-tab { flex: 1; padding: 10px; background: #0f172a; color: #94a3b8; border: 1px solid #334155; border-radius: 8px; font-weight: 700; cursor: pointer; }
+    .mode-tab.active { background: #0284c7; color: #fff; border-color: #0284c7; }
     .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 440px; background: #0f172a; border-top: 1px solid #334155; display: flex; }
     .nav-item { flex: 1; padding: 14px 5px; background: none; border: none; color: #94a3b8; font-weight: 600; cursor: pointer; }
     .nav-item.active { color: #38bdf8; border-top: 2px solid #38bdf8; }
@@ -73,9 +76,13 @@
       <div class="content">
         <!-- TAB 1: GAME -->
         <div id="tab-game" class="tab-page active">
+          <div class="mode-tabs">
+            <button class="mode-tab active" id="mode-30s" onclick="switchMode('30s')">WinGo 30s</button>
+            <button class="mode-tab" id="mode-1min" onclick="switchMode('1min')">WinGo 1 Min</button>
+          </div>
           <div class="card round-row">
             <div>
-              <small style="color:#94a3b8;">WinGo 30s Period</small>
+              <small style="color:#94a3b8;" id="mode-label">WinGo 30s Period</small>
               <div style="font-weight:bold; font-size:16px;" id="period">---</div>
               <small id="bet-status" style="color:#4ade80;">Open</small>
             </div>
@@ -139,7 +146,7 @@
           <div class="card">
             <h4 style="margin-bottom:8px;">My Bet History</h4>
             <table>
-              <thead><tr><th>Period</th><th>Pick</th><th>Amt</th><th>Result</th></tr></thead>
+              <thead><tr><th>Period</th><th>Mode</th><th>Pick</th><th>Amt</th><th>Result</th></tr></thead>
               <tbody id="mybets-body"></tbody>
             </table>
           </div>
@@ -166,6 +173,15 @@
       b.innerText = i;
       b.onclick = () => placeBet('number', i);
       numGrid.appendChild(b);
+    }
+
+    let gameMode = '30s';
+
+    function switchMode(m) {
+      gameMode = m;
+      document.getElementById('mode-30s').classList.toggle('active', m === '30s');
+      document.getElementById('mode-1min').classList.toggle('active', m === '1min');
+      fetchState();
     }
 
     function setAmt(v) { document.getElementById('bet-amount').value = v; }
@@ -214,14 +230,18 @@
       document.getElementById('wagered').innerText = data.user.wagered || 0;
       document.getElementById('wager-required').innerText = (data.user.deposited || 0) + 50;
       document.getElementById('wager-required2').innerText = (data.user.deposited || 0) + 50;
-      document.getElementById('period').innerText = data.period;
+      const is1m = gameMode === '1min';
+      const period = is1m ? data.period1m : data.period;
+      const tl = is1m ? data.timeLeft1m : data.timeLeft;
+      document.getElementById('mode-label').innerText = is1m ? 'WinGo 1 Min Period' : 'WinGo 30s Period';
+      document.getElementById('period').innerText = period;
 
       const timer = document.getElementById('timer');
-      timer.innerText = '00:' + String(data.timeLeft).padStart(2, '0');
-      timer.className = data.timeLeft <= 5 ? 'timer locked' : 'timer';
-      document.getElementById('bet-status').innerText = data.timeLeft <= 5 ? 'Betting Locked' : 'Betting Open';
+      timer.innerText = String(Math.floor(tl / 60)).padStart(2, '0') + ':' + String(tl % 60).padStart(2, '0');
+      timer.className = tl <= 5 ? 'timer locked' : 'timer';
+      document.getElementById('bet-status').innerText = tl <= 5 ? 'Betting Locked' : 'Betting Open';
 
-      document.getElementById('history-body').innerHTML = data.history.map(h =>
+      document.getElementById('history-body').innerHTML = (is1m ? data.history1m : data.history).map(h =>
         `<tr><td>${h.period}</td><td><strong>${h.number}</strong></td><td><span class="dot ${h.color}"></span></td></tr>`
       ).join('');
 
@@ -230,8 +250,8 @@
       ).join('') || '<tr><td colspan="3">No transactions yet</td></tr>';
 
       document.getElementById('mybets-body').innerHTML = data.myBets.map(b =>
-        `<tr><td>${b.period}</td><td>${b.choice.toUpperCase()}</td><td>₹${b.amount}</td><td class="badge-${b.status}">${b.status === 'won' ? '+₹' + b.payout : b.status}</td></tr>`
-      ).join('') || '<tr><td colspan="4">No bets yet</td></tr>';
+        `<tr><td>${b.period}</td><td>${(b.mode || '30s') === '1min' ? '1 Min' : '30s'}</td><td>${b.choice.toUpperCase()}</td><td>₹${b.amount}</td><td class="badge-${b.status}">${b.status === 'won' ? '+₹' + b.payout : b.status}</td></tr>`
+      ).join('') || '<tr><td colspan="5">No bets yet</td></tr>';
     }
 
     async function placeBet(type, choice) {
@@ -240,7 +260,7 @@
       const res = await fetch('/api/bet', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-token': token },
-        body: JSON.stringify({ type, choice, amount })
+        body: JSON.stringify({ type, choice, amount, mode: gameMode })
       });
       const data = await res.json();
       msg.style.color = res.ok ? '#4ade80' : '#f87171';

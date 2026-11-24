@@ -31,19 +31,24 @@
   <div id="admin-panel" style="display:none; max-width:1100px; margin:auto;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
       <h1>PlayZone Live Admin Panel</h1>
-      <div>Period: <strong id="adm-period">---</strong> | Timer: <strong id="adm-timer" style="color:#facc15;">--</strong>s</div>
+      <div style="text-align:right;">30s Period: <strong id="adm-period">---</strong> | Timer: <strong id="adm-timer" style="color:#facc15;">--</strong>s<br/>1 Min Period: <strong id="adm-period1m">---</strong> | Timer: <strong id="adm-timer1m" style="color:#facc15;">--</strong>s</div>
     </div>
 
     <div class="grid">
       <div class="card"><div>Total Users</div><div class="stat-num" id="st-users">0</div></div>
       <div class="card"><div>Pending Deposits</div><div class="stat-num">₹<span id="st-dep">0</span></div></div>
       <div class="card"><div>Pending Withdrawals</div><div class="stat-num">₹<span id="st-wd">0</span></div></div>
-      <div class="card"><div>Live Round Bets</div><div class="stat-num" id="st-bets">0</div></div>
+      <div class="card"><div>Live 30s Bets</div><div class="stat-num" id="st-bets">0</div></div>
+      <div class="card"><div>Live 1 Min Bets</div><div class="stat-num" id="st-bets1m">0</div></div>
     </div>
 
     <div class="card">
       <h3>Next Round Result Control</h3>
       <div style="margin-top:12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <select id="next-mode">
+          <option value="30s">WinGo 30s</option>
+          <option value="1min">WinGo 1 Min</option>
+        </select>
         <input type="number" id="next-num" min="0" max="9" placeholder="Number (0-9)" />
         <button class="btn blue" onclick="setNextResult()">Set Result</button>
         <span id="ctrl-status" style="color:#4ade80; font-size:14px;"></span>
@@ -88,10 +93,13 @@
 
       document.getElementById('adm-period').innerText = d.currentPeriod;
       document.getElementById('adm-timer').innerText = d.timeLeft;
+      document.getElementById('adm-period1m').innerText = d.currentPeriod1m;
+      document.getElementById('adm-timer1m').innerText = d.timeLeft1m;
       document.getElementById('st-users').innerText = d.stats.totalUsers;
       document.getElementById('st-dep').innerText = d.stats.pendingDeposits;
       document.getElementById('st-wd').innerText = d.stats.pendingWithdrawals;
       document.getElementById('st-bets').innerText = d.stats.activeBetsCount;
+      document.getElementById('st-bets1m').innerText = d.stats.activeBetsCount1m;
 
       document.getElementById('adm-txns').innerHTML = d.transactions.map(t => `
         <tr>
@@ -134,7 +142,7 @@
       const res = await fetch('/api/admin/set-result', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
-        body: JSON.stringify({ number })
+        body: JSON.stringify({ number, mode: document.getElementById('next-mode').value })
       });
       const data = await res.json();
       document.getElementById('ctrl-status').innerText = res.ok ? data.message : data.error;
