@@ -26,6 +26,12 @@
     .red { background: #dc2626; }
     .blue { background: #0284c7; }
     .num-btn { background: #334155; color: #fff; border: none; padding: 12px 0; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    .num-btn.green { background: #16a34a; }
+    .num-btn.red { background: #dc2626; }
+    .num-btn.violet { background: #9333ea; }
+    .hist-num.green { color: #4ade80; }
+    .hist-num.red { color: #f87171; }
+    .hist-num.violet { color: #c084fc; }
     .input { width: 100%; padding: 11px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: white; margin-bottom: 10px; }
     .chips { display: flex; gap: 6px; margin-bottom: 10px; }
     .chip { flex: 1; padding: 7px; background: #334155; color: #e2e8f0; border: none; border-radius: 6px; cursor: pointer; }
@@ -193,11 +199,11 @@
     let token = localStorage.getItem('pz_token');
     let pollInterval = null;
 
-    // Build 0-9 buttons
+    // Build 0-9 buttons (coloured by Wingo colour: 0,5 violet; even red; odd green)
     const numGrid = document.getElementById('num-grid');
     for (let i = 0; i <= 9; i++) {
       const b = document.createElement('button');
-      b.className = 'num-btn';
+      b.className = 'num-btn ' + ((i === 0 || i === 5) ? 'violet' : (i % 2 === 0 ? 'red' : 'green'));
       b.innerText = i;
       b.onclick = () => placeBet('number', i);
       numGrid.appendChild(b);
@@ -331,7 +337,7 @@
       document.getElementById('bet-status').innerText = tl <= 5 ? 'Betting Locked' : 'Betting Open';
 
       document.getElementById('history-body').innerHTML = (is1m ? data.history1m : data.history).map(h =>
-        `<tr><td>${h.period}</td><td><strong>${h.number}</strong></td><td><span class="dot ${h.color}"></span></td></tr>`
+        `<tr><td>${h.period}</td><td><strong class="hist-num ${h.color}">${h.number}</strong></td><td><span class="dot ${h.color}"></span></td></tr>`
       ).join('');
 
       document.getElementById('txn-body').innerHTML = data.myTxns.map(t =>
