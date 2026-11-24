@@ -314,7 +314,7 @@ app.get('/api/state', requireAuth, (req, res) => {
     timeLeft,
     period1m: db.currentPeriod1m,
     timeLeft1m,
-    user: { id: req.user.id, phone: req.user.phone, balance: req.user.balance, wagered: req.user.wagered || 0, deposited: req.user.deposited || 0 },
+    user: { id: req.user.id, phone: req.user.phone, balance: req.user.balance, wagered: req.user.wagered || 0, deposited: req.user.deposited || 0, withdrawn: committedWithdrawals(req.user.id) },
     history: db.history.slice(0, 50),
     history1m: (db.history1m || []).slice(0, 50),
     myBets,
@@ -352,6 +352,14 @@ app.post('/api/bet', requireAuth, (req, res) => {
   res.json({ message: 'Bet placed!', balance: req.user.balance });
 });
 
+// Total withdrawals already committed (pending + approved). Bonus is never
+// withdrawable, so a user can only ever take out up to what they deposited.
+function committedWithdrawals(userId) {
+  return db.transactions
+    .filter((t) => t.userId === userId && t.type === 'withdrawal' && (t.status === 'pending' || t.status === 'approved'))
+    .reduce((sum, t) => sum + t.amount, 0);
+}
+
 app.post('/api/wallet/request', requireAuth, (req, res) => {
   const { type, amount, reference } = req.body;
   const amt = Number(amount);
@@ -366,6 +374,8 @@ app.post('/api/wallet/request', requireAuth, (req, res) => {
     if (amt > req.user.balance) return res.status(400).json({ error: 'Balance kam hai' });
     const wagered = req.user.wagered || 0;
     const deposited = req.user.deposited || 0;
+    const withdrawn = committedWithdrawals(req.user.id);
+    if (amt > deposited - withdrawn) return res.status(400).json({ error: `Withdrawal sirf deposit pe hota hai — tumne ₹${deposited} deposit kiya hai, bonus withdraw nahi hota.` });
     const required = deposited + 300;
     if (wagered < required) return res.status(400).json({ error: `Withdrawal ke liye ₹${required} ke bets lagane honge (deposit ₹${deposited} + ₹300 wagering) — abhi ₹${wagered} ke bets lage hain.` });
     req.user.balance -= amt; // Hold balance until approved/rejected
