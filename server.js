@@ -123,7 +123,7 @@ async function persistAll() {
       await client.query('INSERT INTO pz_bets(id, user_id, period, mode, type, choice, amount, payout, status, result_number, time) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) ON CONFLICT (id) DO UPDATE SET payout = EXCLUDED.payout, status = EXCLUDED.status, result_number = EXCLUDED.result_number', [b.id, b.userId, b.period, b.mode || '30s', b.type, String(b.choice), b.amount, b.payout || 0, b.status, b.resultNumber === undefined ? null : b.resultNumber, b.time]);
     }
     for (const t of db.transactions) {
-      await client.query('INSERT INTO pz_transactions(id, user_id, phone, type, amount, reference, status, time) VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (id) DO UPDATE SET status = EXCLUDED.status', [t.id, t.userId, t.phone, t.type, t.amount, t.reference, t.status, t.time]);
+      await client.query('INSERT INTO pz_transactions(id, user_id, phone, type, amount, reference, status, time) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (id) DO UPDATE SET status = EXCLUDED.status', [t.id, t.userId, t.phone, t.type, t.amount, t.reference, t.status, t.time]);
     }
     for (const h of db.history.map((x) => ({ ...x, mode: '30s' })).concat(db.history1m.map((x) => ({ ...x, mode: '1min' })))) {
       await client.query('INSERT INTO pz_history(period, mode, number, color) VALUES($1, $2, $3, $4) ON CONFLICT (period, mode) DO NOTHING', [h.period, h.mode, h.number, h.color]);
