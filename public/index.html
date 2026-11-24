@@ -122,7 +122,7 @@
             <input type="text" id="txn-ref" class="input" placeholder="UTR Number (Deposit) / UPI ID (Withdraw)" />
             <button class="btn blue" style="width:100%;" onclick="submitWallet()">Submit Request</button>
             <div id="wallet-msg" class="msg"></div>
-            <p style="font-size:12px;color:#94a3b8;margin-top:8px;">₹50 bonus withdraw karne se pehle ₹50 ke bets lagane honge. Bets lagaye: ₹<span id="wagered">0</span> / ₹50. Apna deposit kiya hua paisa kabhi bhi withdraw kar sakte ho.</p>
+            <p style="font-size:12px;color:#94a3b8;margin-top:8px;">Withdrawal ke liye deposit + bonus ke barabar bets lagane honge: ₹<span id="wager-required">50</span> (deposit + ₹50 bonus). Bets lagaye: ₹<span id="wagered">0</span> / ₹<span id="wager-required2">50</span>.</p>
           </div>
 
           <div class="card">
@@ -212,6 +212,8 @@
       document.getElementById('user-label').innerText = `${data.user.id} (${data.user.phone})`;
       document.getElementById('balance').innerText = data.user.balance;
       document.getElementById('wagered').innerText = data.user.wagered || 0;
+      document.getElementById('wager-required').innerText = (data.user.deposited || 0) + 50;
+      document.getElementById('wager-required2').innerText = (data.user.deposited || 0) + 50;
       document.getElementById('period').innerText = data.period;
 
       const timer = document.getElementById('timer');
