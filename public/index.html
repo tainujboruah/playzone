@@ -46,6 +46,12 @@
     .badge-won { color: #4ade80; font-weight: bold; }
     .badge-lost { color: #f87171; }
     .badge-pending { color: #facc15; }
+    .upi-box { text-align: center; }
+    .upi-qr img { width: 200px; max-width: 80%; border-radius: 8px; background: #fff; padding: 6px; }
+    .upi-id-row { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 10px 0 6px; }
+    .upi-id { font-size: 17px; font-weight: 700; }
+    .copy-btn { padding: 6px 12px; background: #0284c7; color: #fff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
+    .upi-note { font-size: 12px; color: #94a3b8; }
   </style>
 </head>
 <body>
@@ -119,6 +125,16 @@
 
         <!-- TAB 2: WALLET -->
         <div id="tab-wallet" class="tab-page">
+          <div class="card upi-box">
+            <h4 style="margin-bottom:10px;">Pay via UPI</h4>
+            <div class="upi-qr"><img src="/upi-qr.jpg" alt="UPI QR code" /></div>
+            <div class="upi-id-row">
+              <span class="upi-id">6001601257@mbk</span>
+              <button class="copy-btn" type="button" onclick="copyUPI(this)">Copy</button>
+            </div>
+            <p class="upi-note">Scan the QR code or pay to the UPI ID above. <b>After making the payment, enter the UTR number below and tap Submit.</b></p>
+          </div>
+
           <div class="card">
             <h4 style="margin-bottom:10px;">Deposit / Withdrawal Request</h4>
             <select id="txn-type" class="input">
@@ -185,6 +201,20 @@
     }
 
     function setAmt(v) { document.getElementById('bet-amount').value = v; }
+
+    function copyUPI(btn) {
+      const id = '6001601257@mbk';
+      const done = () => { btn.innerText = 'Copied!'; setTimeout(() => btn.innerText = 'Copy', 1500); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(id).then(done).catch(() => { fallbackCopy(id); done(); });
+      } else { fallbackCopy(id); done(); }
+    }
+    function fallbackCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta);
+    }
 
     function switchTab(id, btn) {
       document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
