@@ -29,6 +29,10 @@
     .num-btn.green { background: #16a34a; }
     .num-btn.red { background: #dc2626; }
     .num-btn.violet { background: #9333ea; }
+    .hn-green { color: #4ade80; }
+    .hn-red { color: #f87171; }
+    .hn-violet { color: #c084fc; }
+    .hn-zero { display: inline-block; background: linear-gradient(to bottom, #f87171 50%, #c084fc 50%); -webkit-background-clip: text; background-clip: text; color: transparent; }
     .pwd-wrap { position: relative; margin-bottom: 10px; }
     .pwd-wrap .input { margin-bottom: 0; padding-right: 58px; }
     .pwd-toggle { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #38bdf8; font-size: 12px; font-weight: 700; cursor: pointer; padding: 4px; }
@@ -251,6 +255,13 @@
       numGrid.appendChild(b);
     }
 
+    // History number colour (text only, no background): 0 = red/violet split, 5 = violet, even = red, odd = green
+    function histNumClass(n) {
+      if (n === 0) return 'hn-zero';
+      if (n === 5) return 'hn-violet';
+      return n % 2 === 0 ? 'hn-red' : 'hn-green';
+    }
+
     let gameMode = '30s';
 
     function switchMode(m) {
@@ -383,7 +394,7 @@
       document.getElementById('bet-status').innerText = tl <= 5 ? 'Betting Locked' : 'Betting Open';
 
       document.getElementById('history-body').innerHTML = (is1m ? data.history1m : data.history).map(h =>
-        `<tr><td>${h.period}</td><td><strong>${h.number}</strong></td><td><span class="dot ${h.color}"></span></td></tr>`
+        `<tr><td>${h.period}</td><td><strong class="${histNumClass(h.number)}">${h.number}</strong></td><td><span class="dot ${h.color}"></span></td></tr>`
       ).join('');
 
       document.getElementById('txn-body').innerHTML = data.myTxns.map(t =>
