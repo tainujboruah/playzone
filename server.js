@@ -366,8 +366,8 @@ app.post('/api/wallet/request', requireAuth, (req, res) => {
     if (amt > req.user.balance) return res.status(400).json({ error: 'Balance kam hai' });
     const wagered = req.user.wagered || 0;
     const deposited = req.user.deposited || 0;
-    const required = deposited + 50;
-    if (wagered < required) return res.status(400).json({ error: `Withdrawal ke liye ₹${required} ke bets lagane honge (deposit ₹${deposited} + bonus ₹50) — abhi ₹${wagered} ke bets lage hain.` });
+    const required = deposited + 300;
+    if (wagered < required) return res.status(400).json({ error: `Withdrawal ke liye ₹${required} ke bets lagane honge (deposit ₹${deposited} + ₹300 wagering) — abhi ₹${wagered} ke bets lage hain.` });
     req.user.balance -= amt; // Hold balance until approved/rejected
   }
 
