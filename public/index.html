@@ -93,6 +93,10 @@
     th, td { padding: 8px 4px; text-align: center; border-bottom: 1px solid #334155; }
     th { color: #94a3b8; }
     .dot { display: inline-block; width: 11px; height: 11px; border-radius: 50%; }
+    .hist-pager { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 12px; }
+    .hist-pager button { width: 36px; height: 36px; border-radius: 10px; border: none; background: #16a34a; color: #fff; font-size: 20px; font-weight: bold; cursor: pointer; }
+    .hist-pager button:disabled { opacity: 0.35; cursor: default; }
+    .hist-pager span { font-weight: 700; color: #e2e8f0; }
     .tab-page { display: none; }
     .tab-page.active { display: block; }
     .mode-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
@@ -179,9 +183,14 @@
           <div class="card">
             <h4 style="margin-bottom:8px;">Game History</h4>
             <table>
-              <thead><tr><th>Period</th><th>Number</th><th>Color</th></tr></thead>
+              <thead><tr><th>Period</th><th>Number</th><th>Big Small</th><th>Color</th></tr></thead>
               <tbody id="history-body"></tbody>
             </table>
+            <div class="hist-pager">
+              <button type="button" id="hist-prev" onclick="histPageNav(-1)">‹</button>
+              <span id="hist-page-label">1/1</span>
+              <button type="button" id="hist-next" onclick="histPageNav(1)">›</button>
+            </div>
           </div>
         </div>
 
@@ -367,6 +376,43 @@
       return n % 2 === 0 ? 'hn-red' : 'hn-green';
     }
 
+    // Full game history (video-style table): Period | Number | Big Small | Color dots, 10 rows/page
+    let histPage = 1;
+    let histPages = 1;
+    let histLoading = false;
+    let lastHistPeriod = null;
+
+    function histBigSmall(n) { return n >= 5 ? 'Big' : 'Small'; }
+    function histDots(n) {
+      if (n === 0) return '<span class="dot red"></span> <span class="dot violet"></span>';
+      if (n === 5) return '<span class="dot green"></span> <span class="dot violet"></span>';
+      return '<span class="dot ' + (n % 2 === 0 ? 'red' : 'green') + '"></span>';
+    }
+    async function loadHistory() {
+      if (!token || histLoading) return;
+      histLoading = true;
+      try {
+        if (histPage > histPages) histPage = histPages;
+        const res = await fetch('/api/history?mode=' + gameMode + '&page=' + histPage + '&limit=10', { headers: { 'x-token': token } });
+        if (!res.ok) return;
+        const d = await res.json();
+        histPages = d.pages || 1;
+        if ((!d.rows || !d.rows.length) && d.page > 1) { histPage = 1; histLoading = false; return loadHistory(); }
+        document.getElementById('history-body').innerHTML = (d.rows || []).map(h =>
+          `<tr><td>${h.period}</td><td><strong class="${histNumClass(h.number)}">${h.number}</strong></td><td>${histBigSmall(h.number)}</td><td>${histDots(h.number)}</td></tr>`
+        ).join('') || '<tr><td colspan="4">No history yet</td></tr>';
+        document.getElementById('hist-page-label').innerText = d.page + '/' + histPages;
+        document.getElementById('hist-prev').disabled = d.page <= 1;
+        document.getElementById('hist-next').disabled = d.page >= histPages;
+      } catch (e) { /* keep previous table on error */ } finally { histLoading = false; }
+    }
+    function histPageNav(dir) {
+      const next = histPage + dir;
+      if (next < 1 || next > histPages) return;
+      histPage = next;
+      loadHistory();
+    }
+
     let gameMode = '30s';
     let lastMyBets = [];
 
@@ -453,9 +499,11 @@
 
     function switchMode(m) {
       gameMode = m;
+      histPage = 1;
       document.getElementById('mode-30s').classList.toggle('active', m === '30s');
       document.getElementById('mode-1min').classList.toggle('active', m === '1min');
       fetchState();
+      loadHistory();
     }
 
     // Bet popup (amount + quantity + multiplier, like the reference app)
@@ -649,9 +697,7 @@
       timer.className = tl <= 5 ? 'timer locked' : 'timer';
       document.getElementById('bet-status').innerText = tl <= 5 ? 'Betting Locked' : 'Betting Open';
 
-      document.getElementById('history-body').innerHTML = (is1m ? data.history1m : data.history).map(h =>
-        `<tr><td>${h.period}</td><td><strong class="${histNumClass(h.number)}">${h.number}</strong></td><td><span class="dot ${h.color}"></span></td></tr>`
-      ).join('');
+      if (period !== lastHistPeriod) { lastHistPeriod = period; loadHistory(); }
 
       document.getElementById('txn-body').innerHTML = data.myTxns.map(t =>
         `<tr><td>${t.type.toUpperCase()}</td><td>₹${t.amount}</td><td class="badge-${t.status === 'approved' ? 'won' : t.status === 'rejected' ? 'lost' : 'pending'}">${t.status}</td></tr>`
