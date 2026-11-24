@@ -60,11 +60,23 @@
     <div id="auth-view" class="auth-screen">
       <h2 style="text-align:center; margin-bottom:20px; color:#38bdf8;">PlayZone Login / Signup</h2>
       <div class="card">
-        <input type="text" id="auth-phone" class="input" placeholder="Phone Number (e.g. 9876543210)" />
-        <input type="password" id="auth-pass" class="input" placeholder="Password" />
-        <div id="auth-msg" class="msg" style="color:#f87171;"></div>
-        <button class="btn blue" style="width:100%; margin-bottom:8px;" onclick="authSubmit('login')">Login</button>
-        <button class="btn green" style="width:100%;" onclick="authSubmit('register')">Create New Account (₹50 Demo Bonus)</button>
+        <!-- Login form -->
+        <div id="login-form">
+          <input type="text" id="auth-phone" class="input" placeholder="Phone Number (e.g. 9876543210)" />
+          <input type="password" id="auth-pass" class="input" placeholder="Password" />
+          <div id="auth-msg" class="msg" style="color:#f87171;"></div>
+          <button class="btn blue" style="width:100%; margin-bottom:8px;" onclick="authSubmit('login')">Login</button>
+          <button class="btn green" style="width:100%;" onclick="showSignup()">Create New Account (₹50 Demo Bonus)</button>
+        </div>
+        <!-- Signup form (opens when Create New Account is tapped) -->
+        <div id="signup-form" style="display:none;">
+          <input type="text" id="su-phone" class="input" placeholder="Mobile Number (10 Digits)" />
+          <input type="password" id="su-pass" class="input" placeholder="Set Password (Min 4 Characters)" />
+          <input type="password" id="su-confirm" class="input" placeholder="Confirm Password" />
+          <div id="signup-msg" class="msg" style="color:#f87171;"></div>
+          <button class="btn green" style="width:100%; margin-bottom:8px;" onclick="signupSubmit()">Create Account (₹50 Bonus)</button>
+          <button class="btn" style="width:100%; background:#334155;" onclick="showLogin()">Back to Login</button>
+        </div>
       </div>
     </div>
 
@@ -241,12 +253,46 @@
       initApp();
     }
 
+    function showSignup() {
+      document.getElementById('login-form').style.display = 'none';
+      document.getElementById('signup-form').style.display = 'block';
+      document.getElementById('signup-msg').innerText = '';
+    }
+
+    function showLogin() {
+      document.getElementById('signup-form').style.display = 'none';
+      document.getElementById('login-form').style.display = 'block';
+      document.getElementById('auth-msg').innerText = '';
+    }
+
+    async function signupSubmit() {
+      const phone = document.getElementById('su-phone').value.trim();
+      const password = document.getElementById('su-pass').value.trim();
+      const confirm = document.getElementById('su-confirm').value.trim();
+      const msg = document.getElementById('signup-msg');
+      if (!/^[6-9]\d{9}$/.test(phone)) { msg.innerText = 'Valid 10-digit mobile number dalein'; return; }
+      if (password.length < 4) { msg.innerText = 'Password min 4 characters ka hona chahiye'; return; }
+      if (password !== confirm) { msg.innerText = 'Password aur Confirm Password same hone chahiye'; return; }
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, password })
+      });
+      const data = await res.json();
+      if (!res.ok) { msg.innerText = data.error; return; }
+      token = data.token;
+      localStorage.setItem('pz_token', token);
+      initApp();
+    }
+
     function logout() {
       localStorage.removeItem('pz_token');
       token = null;
       clearInterval(pollInterval);
       document.getElementById('app-view').style.display = 'none';
       document.getElementById('auth-view').style.display = 'flex';
+      document.getElementById('signup-form').style.display = 'none';
+      document.getElementById('login-form').style.display = 'block';
     }
 
     async function fetchState() {
