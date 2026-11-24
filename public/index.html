@@ -110,7 +110,7 @@
     .badge-lost { color: #f87171; }
     .badge-pending { color: #facc15; }
     .upi-box { text-align: center; }
-    .upi-qr img { width: 200px; max-width: 80%; border-radius: 8px; background: #fff; padding: 6px; }
+    .upi-qr img { width: 240px; max-width: 85%; border-radius: 8px; background: #fff; padding: 6px; }
     .upi-id-row { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 10px 0 6px; }
     .upi-id { font-size: 17px; font-weight: 700; }
     .copy-btn { padding: 6px 12px; background: #0284c7; color: #fff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
@@ -738,11 +738,13 @@
     }
 
     // Deposit QR with the amount embedded (upi://pay?pa=...&am=...) — UPI apps
-    // pre-fill the amount on scan. No amount yet (< ₹100) = plain payee QR.
+    // pre-fill the amount on scan. Payload kept SHORT (no payee name / note) so
+    // the QR stays sparse and easy to scan from a screenshot. No amount yet
+    // (< ₹100) = plain payee QR.
     let depositQR = null;
     function depositUpiString() {
       const amt = Math.floor(Number(document.getElementById('txn-amount').value) || 0);
-      const base = 'upi://pay?pa=6001601257@mbk&pn=PlayZone&cu=INR&tn=PlayZone%20Deposit';
+      const base = 'upi://pay?pa=6001601257@mbk&cu=INR';
       return amt >= 100 ? base + '&am=' + amt : base;
     }
     function renderDepositQR() {
@@ -750,7 +752,7 @@
       if (!box) return;
       if (typeof QRCode === 'undefined') { box.innerHTML = '<img src="/upi-qr.jpg" alt="UPI QR code" />'; return; }
       if (!depositQR) {
-        depositQR = new QRCode(box, { text: depositUpiString(), width: 200, height: 200, correctLevel: QRCode.CorrectLevel.M });
+        depositQR = new QRCode(box, { text: depositUpiString(), width: 240, height: 240, correctLevel: QRCode.CorrectLevel.M });
       } else {
         depositQR.makeCode(depositUpiString());
       }
