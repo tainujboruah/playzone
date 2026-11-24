@@ -291,6 +291,19 @@ app.post('/api/auth/login', (req, res) => {
   res.json({ token, user: { id: user.id, phone: user.phone, balance: user.balance } });
 });
 
+app.post('/api/auth/change-password', requireAuth, (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  if (!oldPassword || !newPassword || newPassword.length < 4) {
+    return res.status(400).json({ error: 'New password min 4 characters ka hona chahiye' });
+  }
+  if (!verifyPassword(oldPassword, req.user.passwordHash)) {
+    return res.status(401).json({ error: 'Current password galat hai' });
+  }
+  req.user.passwordHash = hashPassword(newPassword);
+  saveDB();
+  res.json({ message: 'Password change ho gaya!' });
+});
+
 // --- GAME & USER APIs ---
 app.get('/api/state', requireAuth, (req, res) => {
   const myBets = db.bets.filter((b) => b.userId === req.user.id).slice(0, 20);
@@ -399,6 +412,8 @@ app.get('/api/admin/overview', requireAdmin, (req, res) => {
     },
     users: db.users.map(({ passwordHash, ...safe }) => safe),
     transactions: db.transactions.slice(0, 50),
+    history: db.history.slice(0, 50),
+    history1m: (db.history1m || []).slice(0, 50),
     currentBets: db.bets.filter((b) => (b.mode || '30s') === '30s' && b.period === db.currentPeriod),
     currentBets1m: db.bets.filter((b) => b.mode === '1min' && b.period === db.currentPeriod1m)
   });
