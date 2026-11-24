@@ -29,9 +29,6 @@
     .num-btn.green { background: #16a34a; }
     .num-btn.red { background: #dc2626; }
     .num-btn.violet { background: #9333ea; }
-    .hist-num.green { color: #4ade80; }
-    .hist-num.red { color: #f87171; }
-    .hist-num.violet { color: #c084fc; }
     .pwd-wrap { position: relative; margin-bottom: 10px; }
     .pwd-wrap .input { margin-bottom: 0; padding-right: 58px; }
     .pwd-toggle { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #38bdf8; font-size: 12px; font-weight: 700; cursor: pointer; padding: 4px; }
@@ -386,7 +383,7 @@
       document.getElementById('bet-status').innerText = tl <= 5 ? 'Betting Locked' : 'Betting Open';
 
       document.getElementById('history-body').innerHTML = (is1m ? data.history1m : data.history).map(h =>
-        `<tr><td>${h.period}</td><td><strong class="hist-num ${h.color}">${h.number}</strong></td><td><span class="dot ${h.color}"></span></td></tr>`
+        `<tr><td>${h.period}</td><td><strong>${h.number}</strong></td><td><span class="dot ${h.color}"></span></td></tr>`
       ).join('');
 
       document.getElementById('txn-body').innerHTML = data.myTxns.map(t =>
