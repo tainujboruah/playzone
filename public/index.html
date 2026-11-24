@@ -227,7 +227,7 @@
                 <span class="pm-check">&#10003; Selected</span>
               </div>
               <div style="text-align:center;margin:10px 0;">
-                <div class="upi-qr"><img src="/upi-qr.jpg" alt="UPI QR code" /></div>
+                <div class="upi-qr"><div id="qr-box"></div></div>
                 <div class="upi-id-row">
                   <span class="upi-id">6001601257@mbk</span>
                   <button class="copy-btn" type="button" onclick="copyUPI(this)">Copy</button>
@@ -354,6 +354,7 @@
     </div>
   </div>
 
+  <script src="/qrcode.min.js"></script>
   <script>
     let token = localStorage.getItem('pz_token');
     let currentBalance = 0;
@@ -733,6 +734,26 @@
       document.getElementById('txn-amount').value = amt;
       document.querySelectorAll('.amt-chip').forEach(c => c.classList.remove('sel'));
       if (btn) btn.classList.add('sel');
+      renderDepositQR();
+    }
+
+    // Deposit QR with the amount embedded (upi://pay?pa=...&am=...) — UPI apps
+    // pre-fill the amount on scan. No amount yet (< ₹100) = plain payee QR.
+    let depositQR = null;
+    function depositUpiString() {
+      const amt = Math.floor(Number(document.getElementById('txn-amount').value) || 0);
+      const base = 'upi://pay?pa=6001601257@mbk&pn=PlayZone&cu=INR&tn=PlayZone%20Deposit';
+      return amt >= 100 ? base + '&am=' + amt : base;
+    }
+    function renderDepositQR() {
+      const box = document.getElementById('qr-box');
+      if (!box) return;
+      if (typeof QRCode === 'undefined') { box.innerHTML = '<img src="/upi-qr.jpg" alt="UPI QR code" />'; return; }
+      if (!depositQR) {
+        depositQR = new QRCode(box, { text: depositUpiString(), width: 200, height: 200, correctLevel: QRCode.CorrectLevel.M });
+      } else {
+        depositQR.makeCode(depositUpiString());
+      }
     }
 
     function setTxnType(t) {
@@ -743,6 +764,7 @@
       document.getElementById('amt-rule').innerText = t === 'deposit' ? 'Deposit amount: Min: ₹100 Max: ₹50,000' : 'Withdraw amount: Min: ₹100';
       document.getElementById('txn-ref').placeholder = t === 'deposit' ? 'UTR Number (after payment)' : 'Your UPI ID (payment milega)';
       document.getElementById('wallet-submit-btn').innerText = t === 'deposit' ? 'Pay now' : 'Withdraw';
+      if (t === 'deposit') renderDepositQR();
     }
 
     async function submitWallet() {
@@ -764,6 +786,7 @@
       if (res.ok) {
         document.getElementById('txn-amount').value = '';
         document.getElementById('txn-ref').value = '';
+        renderDepositQR();
         fetchState();
       }
     }
@@ -773,6 +796,8 @@
       document.getElementById('auth-view').style.display = 'none';
       document.getElementById('app-view').style.display = 'block';
       fetchState();
+      document.getElementById('txn-amount').addEventListener('input', renderDepositQR);
+      renderDepositQR();
       clearInterval(pollInterval);
       pollInterval = setInterval(fetchState, 1000);
     }
