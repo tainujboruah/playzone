@@ -238,14 +238,21 @@
     async function authSubmit(mode) {
       const phone = document.getElementById('auth-phone').value.trim();
       const password = document.getElementById('auth-pass').value.trim();
-      const res = await fetch(`/api/auth/${mode}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, password })
-      });
+      const msgEl = document.getElementById('auth-msg');
+      let res;
+      try {
+        res = await fetch(`/api/auth/${mode}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone, password })
+        });
+      } catch (e) {
+        msgEl.innerText = 'Server se connect nahi ho raha — thoda ruk kar dobara try karo';
+        return;
+      }
       const data = await res.json();
       if (!res.ok) {
-        document.getElementById('auth-msg').innerText = data.error;
+        msgEl.innerText = data.error;
         return;
       }
       token = data.token;
@@ -273,11 +280,17 @@
       if (!/^[6-9]\d{9}$/.test(phone)) { msg.innerText = 'Valid 10-digit mobile number dalein'; return; }
       if (password.length < 4) { msg.innerText = 'Password min 4 characters ka hona chahiye'; return; }
       if (password !== confirm) { msg.innerText = 'Password aur Confirm Password same hone chahiye'; return; }
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, password })
-      });
+      let res;
+      try {
+        res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone, password })
+        });
+      } catch (e) {
+        msg.innerText = 'Server se connect nahi ho raha — thoda ruk kar dobara try karo';
+        return;
+      }
       const data = await res.json();
       if (!res.ok) { msg.innerText = data.error; return; }
       token = data.token;
