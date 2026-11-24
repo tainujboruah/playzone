@@ -229,7 +229,7 @@
             <input type="text" id="txn-ref" class="input" placeholder="UTR Number (after payment)" />
             <button class="btn blue" style="width:100%;" id="wallet-submit-btn" onclick="submitWallet()">Pay now</button>
             <div id="wallet-msg" class="msg"></div>
-            <p style="font-size:12px;color:#94a3b8;margin-top:8px;">Withdrawal ke liye deposit + ₹300 wagering ke barabar bets lagane honge: ₹<span id="wager-required">300</span> (deposit + ₹300). Bets lagaye: ₹<span id="wagered">0</span> / ₹<span id="wager-required2">300</span>.</p>
+            <p style="font-size:12px;color:#94a3b8;margin-top:8px;">Withdrawal sirf deposit amount tak hota hai (bonus withdraw nahi hota). Withdrawal ke liye deposit + ₹300 wagering ke barabar bets bhi lagane honge: ₹<span id="wager-required">300</span> (deposit + ₹300). Bets lagaye: ₹<span id="wagered">0</span> / ₹<span id="wager-required2">300</span>.</p>
             <div class="dep-tips">
               <b style="color:#e2e8f0;">Deposit tips:</b><br />
               1. Har deposit admin approval ke baad 1-5 minute me credit hota hai.<br />
@@ -635,8 +635,9 @@
       document.getElementById('wager-required2').innerText = (data.user.deposited || 0) + 300;
       document.getElementById('wal-balance').innerText = data.user.balance;
       const wagerOk = (data.user.wagered || 0) >= (data.user.deposited || 0) + 300;
-      document.getElementById('wal-withdrawable').innerText = wagerOk ? data.user.balance : 0;
-      document.getElementById('wal-withdraw-note').innerText = wagerOk ? 'Ready to withdraw' : ('₹' + (((data.user.deposited || 0) + 300) - (data.user.wagered || 0)) + ' bets aur lagao');
+      const withdrawable = wagerOk ? Math.max(0, Math.min(data.user.balance, (data.user.deposited || 0) - (data.user.withdrawn || 0))) : 0;
+      document.getElementById('wal-withdrawable').innerText = withdrawable;
+      document.getElementById('wal-withdraw-note').innerText = wagerOk ? (withdrawable > 0 ? 'Ready to withdraw' : 'Deposit pe hi withdrawal hota hai') : ('₹' + (((data.user.deposited || 0) + 300) - (data.user.wagered || 0)) + ' bets aur lagao');
       const is1m = gameMode === '1min';
       const period = is1m ? data.period1m : data.period;
       const tl = is1m ? data.timeLeft1m : data.timeLeft;
