@@ -164,6 +164,16 @@ function getColorByNumber(num) {
   return num % 2 === 0 ? 'red' : 'green';
 }
 
+// Insert one settled history row into Postgres immediately (single INSERT).
+// The full persistAll() rewrites the whole state and its queue backs up under
+// load, so settled rows were reaching PG minutes late — and rows that fell out
+// of the 500-row memory window were lost from PG forever. This keeps the
+// history table live. Fire-and-forget: a DB error must never break the timer.
+function insertHistoryRow(mode, period, number, color) {
+  if (!USE_PG || !PG_OK || !pool) return;
+  pool.query('INSERT INTO pz_history(period, mode, number, color) VALUES($1, $2, $3, $4) ON CONFLICT (period, mode) DO NOTHING', [period, mode, number, color]).catch((e) => console.error('[PG] history insert failed:', e.message));
+}
+
 // Settle one finished period (mode: '30s' or '1min')
 function settlePeriod(mode) {
   const is1m = mode === '1min';
@@ -208,6 +218,7 @@ function settlePeriod(mode) {
     number: winningNumber,
     color: winningColor
   });
+  insertHistoryRow(mode, db[periodKey], winningNumber, winningColor);
   if (db[histKey].length > HISTORY_MEM_LIMIT) db[histKey].pop();
 
   db[periodKey]++;
