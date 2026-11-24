@@ -50,6 +50,41 @@
     .pay-method { display: flex; align-items: center; gap: 10px; background: #1e293b; border: 2px solid #0284c7; border-radius: 10px; padding: 12px; margin: 10px 0; }
     .pm-check { margin-left: auto; color: #4ade80; font-weight: bold; font-size: 13px; white-space: nowrap; }
     .dep-tips { font-size: 12px; color: #94a3b8; line-height: 1.7; margin-top: 10px; }
+    .profile-head { background: linear-gradient(135deg, #0284c7, #1d4ed8); padding: 18px; border-radius: 0 0 18px 18px; margin: -15px -15px 14px -15px; }
+    .profile-id-row { display: flex; align-items: center; gap: 14px; }
+    .avatar-circle { width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,0.25); color: #fff; font-size: 28px; font-weight: bold; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .vip-badge { display: inline-block; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: #fff; font-size: 12px; font-weight: bold; padding: 4px 10px; border-radius: 20px; margin-top: 6px; }
+    .mini-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 3px 8px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+    .menu-list { background: #0f172a; border: 1px solid #334155; border-radius: 12px; overflow: hidden; }
+    .menu-row { display: flex; align-items: center; gap: 12px; width: 100%; background: none; border: none; border-bottom: 1px solid #334155; color: #f8fafc; padding: 14px; font-size: 15px; cursor: pointer; text-align: left; }
+    .menu-row:last-child { border-bottom: none; }
+    .menu-row .m-ico { width: 24px; text-align: center; color: #38bdf8; flex-shrink: 0; }
+    .menu-row .m-chev { margin-left: auto; color: #94a3b8; }
+    .menu-row .m-val { margin-left: auto; color: #94a3b8; font-size: 13px; }
+    .prof-bal-card { background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 16px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
+    .prof-bal-amt { font-size: 26px; font-weight: bold; color: #4ade80; }
+    .prof-act { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; color: #e2e8f0; font-size: 12px; cursor: pointer; }
+    .prof-act .m-ico { color: #38bdf8; }
+    .refresh-btn { background: none; border: none; color: #94a3b8; font-size: 18px; cursor: pointer; padding: 2px 6px; }
+    .popup-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 40; display: none; }
+    .popup-backdrop.open { display: block; }
+    .bet-popup { position: fixed; left: 0; right: 0; bottom: 0; max-width: 500px; margin: 0 auto; background: #1e293b; border-radius: 18px 18px 0 0; padding: 18px; z-index: 50; display: none; border-top: 1px solid #334155; }
+    .bet-popup.open { display: block; }
+    .pop-title { font-size: 17px; font-weight: bold; text-align: center; }
+    .pop-pick { text-align: center; color: #94a3b8; font-size: 14px; margin-top: 4px; }
+    .pop-label { color: #94a3b8; font-size: 13px; margin: 14px 0 8px; }
+    .pop-amounts { display: flex; gap: 8px; }
+    .pop-amt { flex: 1; padding: 10px 0; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #f8fafc; font-size: 15px; cursor: pointer; }
+    .pop-amt.sel { background: #0284c7; border-color: #0284c7; }
+    .qty-row { display: flex; align-items: center; justify-content: space-between; }
+    .qty-btn { width: 44px; height: 40px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #f8fafc; font-size: 20px; cursor: pointer; }
+    .qty-val { width: 64px; text-align: center; padding: 9px 0; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #f8fafc; font-size: 16px; }
+    .pop-mult { display: flex; gap: 6px; flex-wrap: wrap; }
+    .pop-mult button { flex: 1; min-width: 52px; padding: 9px 0; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #f8fafc; font-size: 14px; cursor: pointer; }
+    .pop-mult button.sel { background: #0284c7; border-color: #0284c7; }
+    .agree-row { display: flex; align-items: center; gap: 8px; margin: 16px 0 12px; font-size: 13px; color: #94a3b8; cursor: pointer; }
+    .pop-actions { display: flex; gap: 10px; }
+    .pop-actions .btn { flex: 1; padding: 13px 0; font-size: 15px; }
     .input { width: 100%; padding: 11px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: white; margin-bottom: 10px; }
     .chips { display: flex; gap: 6px; margin-bottom: 10px; }
     .chip { flex: 1; padding: 7px; background: #334155; color: #e2e8f0; border: none; border-radius: 6px; cursor: pointer; }
@@ -132,19 +167,10 @@
           </div>
 
           <div class="card">
-            <input type="number" id="bet-amount" class="input" value="1" min="1" placeholder="Enter Amount" />
-            <div class="chips">
-              <button class="chip" onclick="setAmt(1)">₹1</button>
-              <button class="chip" onclick="setAmt(3)">₹3</button>
-              <button class="chip" onclick="setAmt(9)">₹9</button>
-              <button class="chip" onclick="setAmt(27)">₹27</button>
-              <button class="chip" onclick="setAmt(81)">₹81</button>
-              <button class="chip" onclick="setAmt(243)">₹243</button>
-            </div>
             <div class="grid-3">
-              <button class="btn green" onclick="placeBet('color', 'green')">Green 2x</button>
-              <button class="btn violet" onclick="placeBet('color', 'violet')">Violet 4.5x</button>
-              <button class="btn red" onclick="placeBet('color', 'red')">Red 2x</button>
+              <button class="btn green" onclick="openBetPopup('color', 'green')">Green 2x</button>
+              <button class="btn violet" onclick="openBetPopup('color', 'violet')">Violet 4.5x</button>
+              <button class="btn red" onclick="openBetPopup('color', 'red')">Red 2x</button>
             </div>
             <div class="grid-5" id="num-grid"></div>
             <div id="game-msg" class="msg"></div>
@@ -231,18 +257,97 @@
             </table>
           </div>
         </div>
+
+        <!-- TAB 4: PROFILE -->
+        <div id="tab-profile" class="tab-page">
+          <div class="profile-head">
+            <div class="profile-id-row">
+              <div class="avatar-circle" id="profile-avatar">U</div>
+              <div>
+                <div style="font-size:15px;">UID: <b id="profile-uid">---</b> <button class="mini-btn" type="button" onclick="copyProfileUID(this)">Copy</button></div>
+                <div style="font-size:14px; opacity:0.9; margin-top:4px;" id="profile-phone">---</div>
+                <span class="vip-badge">VIP0</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="prof-bal-card">
+            <div>
+              <div style="font-size:13px;color:#94a3b8;">Wallet Balance <button class="refresh-btn" type="button" onclick="fetchState()" title="Refresh">&#8635;</button></div>
+              <div class="prof-bal-amt">&#8377;<span id="profile-balance">0</span></div>
+            </div>
+            <div style="display:flex; gap:20px;">
+              <button class="prof-act" type="button" onclick="goWallet('deposit')"><span class="m-ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="5 12 12 19 19 12"/></svg></span>Deposit</button>
+              <button class="prof-act" type="button" onclick="goWallet('withdrawal')"><span class="m-ico"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></span>Withdraw</button>
+            </div>
+          </div>
+
+          <div class="menu-list">
+            <button class="menu-row" type="button" onclick="showProfilePanel('notifications')"><span class="m-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>Notifications<span class="m-chev">&#8250;</span></button>
+            <button class="menu-row" type="button" onclick="showProfilePanel('coupons')"><span class="m-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span>Coupons<span class="m-chev">&#8250;</span></button>
+            <button class="menu-row" type="button" onclick="goWallet('deposit')"><span class="m-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>Balance Record<span class="m-chev">&#8250;</span></button>
+            <button class="menu-row" type="button" onclick="switchTab('tab-bets', document.querySelectorAll('.nav-item')[2])"><span class="m-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>Game History<span class="m-chev">&#8250;</span></button>
+            <button class="menu-row" type="button" onclick="showProfilePanel('stats')"><span class="m-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></span>Game Statistics<span class="m-chev">&#8250;</span></button>
+            <button class="menu-row" type="button" onclick="showProfilePanel('security')"><span class="m-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>Account &amp; Security<span class="m-chev">&#8250;</span></button>
+            <button class="menu-row" type="button" onclick="showProfilePanel('support')"><span class="m-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg></span>Live Support<span class="m-chev">&#8250;</span></button>
+            <button class="menu-row" type="button" onclick="showProfilePanel('gifts')"><span class="m-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></span>Gifts<span class="m-chev">&#8250;</span></button>
+            <button class="menu-row" type="button" onclick="showProfilePanel('language')"><span class="m-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>Language<span class="m-val">EN</span><span class="m-chev">&#8250;</span></button>
+            <button class="menu-row" type="button" onclick="showProfilePanel('settings')"><span class="m-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></span>Settings<span class="m-chev">&#8250;</span></button>
+          </div>
+
+          <div class="card" id="profile-panel" style="display:none; margin-top:14px;">
+            <h4 id="profile-panel-title" style="margin-bottom:8px;"></h4>
+            <div id="profile-panel-body" style="font-size:14px; line-height:1.6;"></div>
+          </div>
+        </div>
       </div>
 
       <div class="bottom-nav">
         <button class="nav-item active" onclick="switchTab('tab-game', this)">Game</button>
         <button class="nav-item" onclick="switchTab('tab-wallet', this)">Wallet</button>
         <button class="nav-item" onclick="switchTab('tab-bets', this)">My Bets</button>
+        <button class="nav-item" onclick="switchTab('tab-profile', this)">Profile</button>
+      </div>
+
+      <!-- Bet popup (amount + quantity + multiplier, like the reference app) -->
+      <div class="popup-backdrop" id="bet-backdrop" onclick="closeBetPopup()"></div>
+      <div class="bet-popup" id="bet-popup">
+        <div class="pop-title" id="pop-mode-label">WinGo 30s</div>
+        <div class="pop-pick" id="pop-pick-label">Select Green</div>
+        <div class="pop-label">Amount</div>
+        <div class="pop-amounts" id="pop-amounts">
+          <button class="pop-amt sel" type="button" onclick="setPopupAmount(1, this)">1</button>
+          <button class="pop-amt" type="button" onclick="setPopupAmount(10, this)">10</button>
+          <button class="pop-amt" type="button" onclick="setPopupAmount(100, this)">100</button>
+          <button class="pop-amt" type="button" onclick="setPopupAmount(1000, this)">1000</button>
+        </div>
+        <div class="pop-label">Quantity</div>
+        <div class="qty-row">
+          <button class="qty-btn" type="button" onclick="changeQty(-1)">-</button>
+          <input class="qty-val" id="pop-qty" type="number" value="1" min="1" max="10" readonly />
+          <button class="qty-btn" type="button" onclick="changeQty(1)">+</button>
+          <div class="pop-mult" style="flex:1; margin-left:10px;" id="pop-mult">
+            <button type="button" class="sel" onclick="setPopupMult(1, this)">X1</button>
+            <button type="button" onclick="setPopupMult(5, this)">X5</button>
+            <button type="button" onclick="setPopupMult(10, this)">X10</button>
+            <button type="button" onclick="setPopupMult(20, this)">X20</button>
+            <button type="button" onclick="setPopupMult(50, this)">X50</button>
+            <button type="button" onclick="setPopupMult(100, this)">X100</button>
+          </div>
+        </div>
+        <label class="agree-row"><input type="checkbox" id="pop-agree" /> Agree Presale Rules</label>
+        <div id="pop-msg" class="msg"></div>
+        <div class="pop-actions">
+          <button class="btn" type="button" style="background:#334155;" onclick="closeBetPopup()">Cancel</button>
+          <button class="btn blue" type="button" id="pop-confirm" onclick="confirmBet()">Total Amount &#8377;1.00</button>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
     let token = localStorage.getItem('pz_token');
+    let currentBalance = 0;
     let pollInterval = null;
 
     // Build 0-9 buttons (coloured by Wingo colour: 0,5 violet; even red; odd green)
@@ -251,7 +356,7 @@
       const b = document.createElement('button');
       b.className = 'num-btn ' + ((i === 0 || i === 5) ? 'violet' : (i % 2 === 0 ? 'red' : 'green'));
       b.innerText = i;
-      b.onclick = () => placeBet('number', i);
+      b.onclick = () => openBetPopup('number', i);
       numGrid.appendChild(b);
     }
 
@@ -263,6 +368,88 @@
     }
 
     let gameMode = '30s';
+    let lastMyBets = [];
+
+    function navBtn(i) { return document.querySelectorAll('.nav-item')[i]; }
+
+    function goWallet(type) {
+      setTxnType(type);
+      switchTab('tab-wallet', navBtn(1));
+    }
+
+    function copyProfileUID(btn) {
+      const id = document.getElementById('profile-uid').innerText;
+      const done = () => { btn.innerText = 'Copied!'; setTimeout(() => btn.innerText = 'Copy', 1500); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(id).then(done).catch(() => { fallbackCopy(id); done(); });
+      } else { fallbackCopy(id); done(); }
+    }
+
+    function showProfilePanel(kind) {
+      const panel = document.getElementById('profile-panel');
+      const title = document.getElementById('profile-panel-title');
+      const body = document.getElementById('profile-panel-body');
+      panel.style.display = 'block';
+      if (kind === 'notifications') { title.innerText = 'Notifications'; body.innerHTML = 'No notifications yet.'; }
+      else if (kind === 'coupons') { title.innerText = 'Coupons'; body.innerHTML = 'No coupons available.'; }
+      else if (kind === 'stats') {
+        title.innerText = 'Game Statistics';
+        const bets = lastMyBets || [];
+        const settled = bets.filter(b => b.status === 'won' || b.status === 'lost');
+        const won = bets.filter(b => b.status === 'won');
+        const wagered = bets.reduce((s, b) => s + Number(b.amount || 0), 0);
+        const payout = won.reduce((s, b) => s + Number(b.payout || 0), 0);
+        const winRate = settled.length ? Math.round(won.length / settled.length * 100) : 0;
+        body.innerHTML = '<table><tbody>'
+          + `<tr><td>Total bets</td><td><b>${bets.length}</b></td></tr>`
+          + `<tr><td>Won</td><td><b>${won.length}</b></td></tr>`
+          + `<tr><td>Lost</td><td><b>${settled.length - won.length}</b></td></tr>`
+          + `<tr><td>Win rate</td><td><b>${winRate}%</b></td></tr>`
+          + `<tr><td>Total wagered</td><td><b>&#8377;${wagered}</b></td></tr>`
+          + `<tr><td>Total payout</td><td><b>&#8377;${payout}</b></td></tr>`
+          + '</tbody></table><small style="color:#94a3b8;">Based on your last 20 bets.</small>';
+      }
+      else if (kind === 'security') {
+        title.innerText = 'Account & Security';
+        body.innerHTML = '<input type="password" id="cp-old" class="input" placeholder="Current password" style="margin-bottom:8px;" />'
+          + '<input type="password" id="cp-new" class="input" placeholder="New password (min 4)" style="margin-bottom:8px;" />'
+          + '<input type="password" id="cp-confirm" class="input" placeholder="Confirm new password" style="margin-bottom:8px;" />'
+          + '<button class="btn blue" style="width:100%; margin-bottom:8px;" onclick="changePassword()">Change Password</button>'
+          + '<div id="cp-msg" class="msg"></div>'
+          + '<button class="btn red" style="width:100%;" onclick="logout()">Logout</button>';
+      }
+      else if (kind === 'support') { title.innerText = 'Live Support'; body.innerHTML = 'For help with deposits or withdrawals, check My Transactions in the Wallet tab. For anything else, contact the admin.'; }
+      else if (kind === 'gifts') { title.innerText = 'Gifts'; body.innerHTML = 'No gifts yet.'; }
+      else if (kind === 'language') { title.innerText = 'Language'; body.innerHTML = 'PlayZone is in English for now.'; }
+      else if (kind === 'settings') {
+        title.innerText = 'Settings';
+        body.innerHTML = 'PlayZone v1.7<br/>Server: playzone-qmm6.onrender.com<br/>Game history and accounts are saved permanently.<br/><br/><button class="btn red" style="width:100%;" onclick="logout()">Logout</button>';
+      }
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    async function changePassword() {
+      const oldP = document.getElementById('cp-old').value;
+      const nw = document.getElementById('cp-new').value;
+      const cf = document.getElementById('cp-confirm').value;
+      const msg = document.getElementById('cp-msg');
+      if (!oldP || nw.length < 4) { msg.style.color = '#f87171'; msg.innerText = 'New password min 4 characters ka hona chahiye'; return; }
+      if (nw !== cf) { msg.style.color = '#f87171'; msg.innerText = 'New password aur confirm same hone chahiye'; return; }
+      let res;
+      try {
+        res = await fetch('/api/auth/change-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-token': token },
+          body: JSON.stringify({ oldPassword: oldP, newPassword: nw })
+        });
+      } catch (e) {
+        msg.style.color = '#f87171'; msg.innerText = 'Server se connect nahi ho raha — thoda ruk kar dobara try karo'; return;
+      }
+      const data = await res.json();
+      msg.style.color = res.ok ? '#4ade80' : '#f87171';
+      msg.innerText = res.ok ? 'Password change ho gaya!' : (data.error || 'Password change nahi hua');
+      if (res.ok) { document.getElementById('cp-old').value = ''; document.getElementById('cp-new').value = ''; document.getElementById('cp-confirm').value = ''; }
+    }
 
     function switchMode(m) {
       gameMode = m;
@@ -271,7 +458,69 @@
       fetchState();
     }
 
-    function setAmt(v) { document.getElementById('bet-amount').value = v; }
+    // Bet popup (amount + quantity + multiplier, like the reference app)
+    let popType = 'color', popChoice = 'green', popAmount = 1, popQty = 1, popMult = 1;
+
+    function openBetPopup(type, choice) {
+      popType = type; popChoice = choice;
+      popAmount = 1; popQty = 1; popMult = 1;
+      document.getElementById('pop-qty').value = 1;
+      document.getElementById('pop-agree').checked = false;
+      document.getElementById('pop-msg').innerText = '';
+      document.querySelectorAll('#pop-amounts .pop-amt').forEach((b, i) => b.classList.toggle('sel', i === 0));
+      document.querySelectorAll('#pop-mult button').forEach((b, i) => b.classList.toggle('sel', i === 0));
+      document.getElementById('pop-mode-label').innerText = gameMode === '1min' ? 'WinGo 1 Min' : 'WinGo 30s';
+      const pickName = type === 'number' ? choice : (choice === 'green' ? 'Green' : choice === 'red' ? 'Red' : 'Violet');
+      document.getElementById('pop-pick-label').innerText = 'Select ' + pickName;
+      updatePopupTotal();
+      document.getElementById('bet-backdrop').classList.add('open');
+      document.getElementById('bet-popup').classList.add('open');
+    }
+
+    function closeBetPopup() {
+      document.getElementById('bet-backdrop').classList.remove('open');
+      document.getElementById('bet-popup').classList.remove('open');
+    }
+
+    function popupTotal() { return popAmount * popQty * popMult; }
+
+    function updatePopupTotal() {
+      document.getElementById('pop-confirm').innerText = 'Total Amount \u20B9' + popupTotal().toFixed(2);
+    }
+
+    function setPopupAmount(v, btn) {
+      popAmount = v;
+      document.querySelectorAll('#pop-amounts .pop-amt').forEach((b) => b.classList.remove('sel'));
+      btn.classList.add('sel');
+      updatePopupTotal();
+    }
+
+    function changeQty(d) {
+      popQty = Math.min(10, Math.max(1, popQty + d));
+      document.getElementById('pop-qty').value = popQty;
+      updatePopupTotal();
+    }
+
+    function setPopupMult(v, btn) {
+      popMult = v;
+      document.querySelectorAll('#pop-mult button').forEach((b) => b.classList.remove('sel'));
+      btn.classList.add('sel');
+      updatePopupTotal();
+    }
+
+    function confirmBet() {
+      if (!document.getElementById('pop-agree').checked) {
+        document.getElementById('pop-msg').innerText = 'Pehle Presale Rules agree karein.';
+        return;
+      }
+      const total = popupTotal();
+      if (total > currentBalance) {
+        document.getElementById('pop-msg').innerText = 'Wallet balance kam hai (Total \u20B9' + total + ').';
+        return;
+      }
+      closeBetPopup();
+      placeBet(popType, popChoice, total);
+    }
 
     function copyUPI(btn) {
       const id = '6001601257@mbk';
@@ -375,6 +624,12 @@
 
       document.getElementById('user-label').innerText = `${data.user.id} (${data.user.phone})`;
       document.getElementById('balance').innerText = data.user.balance;
+      currentBalance = data.user.balance;
+      lastMyBets = data.myBets || [];
+      document.getElementById('profile-uid').innerText = data.user.id;
+      document.getElementById('profile-phone').innerText = data.user.phone;
+      document.getElementById('profile-balance').innerText = data.user.balance;
+      document.getElementById('profile-avatar').innerText = (data.user.id || 'U').charAt(0);
       document.getElementById('wagered').innerText = data.user.wagered || 0;
       document.getElementById('wager-required').innerText = (data.user.deposited || 0) + 50;
       document.getElementById('wager-required2').innerText = (data.user.deposited || 0) + 50;
@@ -406,8 +661,8 @@
       ).join('') || '<tr><td colspan="5">No bets yet</td></tr>';
     }
 
-    async function placeBet(type, choice) {
-      const amount = document.getElementById('bet-amount').value;
+    async function placeBet(type, choice, amount) {
+      if (!amount || amount < 1) { alert('Minimum bet \u20B91 hai'); return; }
       const msg = document.getElementById('game-msg');
       const res = await fetch('/api/bet', {
         method: 'POST',

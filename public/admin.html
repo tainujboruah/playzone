@@ -18,6 +18,14 @@
     .green { background: #16a34a; }
     .red { background: #dc2626; }
     .blue { background: #0284c7; }
+    .hn-green { color: #4ade80; }
+    .hn-red { color: #f87171; }
+    .hn-violet { color: #c084fc; }
+    .hn-zero { display: inline-block; background: linear-gradient(to bottom, #f87171 50%, #c084fc 50%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; }
+    .dot.green { background: #16a34a; }
+    .dot.red { background: #dc2626; }
+    .dot.violet { background: #9333ea; }
     input, select { padding: 10px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #fff; }
   </style>
 </head>
@@ -52,6 +60,26 @@
         <input type="number" id="next-num" min="0" max="9" placeholder="Number (0-9)" />
         <button class="btn blue" onclick="setNextResult()">Set Result</button>
         <span id="ctrl-status" style="color:#4ade80; font-size:14px;"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Game History (last 50 per mode)</h3>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+        <div>
+          <h4 style="margin:10px 0 4px;">WinGo 30s</h4>
+          <table>
+            <thead><tr><th>Period</th><th>Number</th><th>Color</th></tr></thead>
+            <tbody id="adm-history"></tbody>
+          </table>
+        </div>
+        <div>
+          <h4 style="margin:10px 0 4px;">WinGo 1 Min</h4>
+          <table>
+            <thead><tr><th>Period</th><th>Number</th><th>Color</th></tr></thead>
+            <tbody id="adm-history1m"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -100,6 +128,13 @@
       document.getElementById('st-wd').innerText = d.stats.pendingWithdrawals;
       document.getElementById('st-bets').innerText = d.stats.activeBetsCount;
       document.getElementById('st-bets1m').innerText = d.stats.activeBetsCount1m;
+
+      const histNumClass = (n) => n === 0 ? 'hn-zero' : n === 5 ? 'hn-violet' : (n % 2 === 0 ? 'hn-red' : 'hn-green');
+      const histRows = (arr) => (arr || []).map(h =>
+        `<tr><td>${h.period}</td><td><strong class="${histNumClass(h.number)}">${h.number}</strong></td><td><span class="dot ${h.color}"></span></td></tr>`
+      ).join('') || '<tr><td colspan="3">No history yet</td></tr>';
+      document.getElementById('adm-history').innerHTML = histRows(d.history);
+      document.getElementById('adm-history1m').innerHTML = histRows(d.history1m);
 
       document.getElementById('adm-txns').innerHTML = d.transactions.map(t => `
         <tr>
