@@ -212,7 +212,7 @@ app.post('/api/wallet/request', requireAuth, (req, res) => {
   if (!['deposit', 'withdrawal'].includes(type)) {
     return res.status(400).json({ error: 'Invalid transaction type' });
   }
-  if (!amt || amt < 100) return res.status(400).json({ error: 'Minimum amount ₹100 hai' });
+  if (!amt || amt < 1) return res.status(400).json({ error: 'Minimum amount ₹1 hai' });
   if (!reference) return res.status(400).json({ error: 'UTR ya UPI ID enter karein' });
 
   if (type === 'withdrawal') {
