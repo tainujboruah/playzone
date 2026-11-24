@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { Pool } = require('pg');
+const QRCode = require('qrcode');
 
 const app = express();
 app.use(express.json());
@@ -305,6 +306,25 @@ app.post('/api/auth/change-password', requireAuth, (req, res) => {
 });
 
 // --- GAME & USER APIs ---
+// Deposit QR (PNG, server-generated): the user's own MobiKwik receive QR, but
+// with the selected amount embedded so UPI apps pre-fill it on scan.
+// Server-generated = crisp exact-module raster (the old browser-canvas QR
+// anti-aliased module edges and MobiKwik's gallery scanner could not detect
+// it). Error correction H, so the M logo overlaid in the centre still decodes.
+app.get('/api/deposit-qr', async (req, res) => {
+  const amt = Math.floor(Number(req.query.amount) || 0);
+  const text = amt >= 100 && amt <= 50000
+    ? 'upi://pay?pa=6001601257@mbk&pn=Tainuj%20Boruah&am=' + amt + '&cu=INR'
+    : 'upi://pay?pa=6001601257@mbk&pn=Tainuj%20Boruah';
+  try {
+    const png = await QRCode.toBuffer(text, { errorCorrectionLevel: 'H', width: 370, margin: 2, color: { dark: '#000000', light: '#FFFFFF' } });
+    res.type('png').send(png);
+  } catch (e) {
+    console.error('[QR] generate failed:', e.message);
+    res.status(500).send('QR failed');
+  }
+});
+
 app.get('/api/state', requireAuth, (req, res) => {
   const myBets = db.bets.filter((b) => b.userId === req.user.id).slice(0, 20);
   const myTxns = db.transactions.filter((t) => t.userId === req.user.id).slice(0, 20);
