@@ -1,0 +1,1 @@
+{"dependencies":{"express":"^4.18.2"},"description":"Playzone — 30-second color prediction game (demo coins)","main":"server.js","name":"playzone-app","scripts":{"start":"node server.js"},"version":"1.0.0"}
