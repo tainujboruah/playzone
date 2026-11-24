@@ -32,6 +32,23 @@
     .hist-num.green { color: #4ade80; }
     .hist-num.red { color: #f87171; }
     .hist-num.violet { color: #c084fc; }
+    .pwd-wrap { position: relative; margin-bottom: 10px; }
+    .pwd-wrap .input { margin-bottom: 0; padding-right: 58px; }
+    .pwd-toggle { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #38bdf8; font-size: 12px; font-weight: 700; cursor: pointer; padding: 4px; }
+    .bal-row { display: flex; gap: 10px; margin-bottom: 12px; }
+    .bal-card { flex: 1; background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 12px; text-align: center; }
+    .bal-label { font-size: 13px; color: #94a3b8; }
+    .bal-amt { font-size: 24px; font-weight: bold; color: #facc15; margin-top: 4px; }
+    .bal-sub { font-size: 11px; color: #94a3b8; margin-top: 2px; min-height: 14px; }
+    .seg-toggle { display: flex; gap: 8px; margin-bottom: 12px; }
+    .seg-btn { flex: 1; padding: 10px; background: #0f172a; color: #94a3b8; border: 1px solid #334155; border-radius: 8px; font-weight: 700; cursor: pointer; }
+    .seg-btn.active { background: #0284c7; color: #fff; border-color: #0284c7; }
+    .amt-chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0; }
+    .amt-chip { padding: 10px 4px; background: #1e293b; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-weight: 700; cursor: pointer; }
+    .amt-chip.sel { background: #0284c7; border-color: #0284c7; color: #fff; }
+    .pay-method { display: flex; align-items: center; gap: 10px; background: #1e293b; border: 2px solid #0284c7; border-radius: 10px; padding: 12px; margin: 10px 0; }
+    .pm-check { margin-left: auto; color: #4ade80; font-weight: bold; font-size: 13px; white-space: nowrap; }
+    .dep-tips { font-size: 12px; color: #94a3b8; line-height: 1.7; margin-top: 10px; }
     .input { width: 100%; padding: 11px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: white; margin-bottom: 10px; }
     .chips { display: flex; gap: 6px; margin-bottom: 10px; }
     .chip { flex: 1; padding: 7px; background: #334155; color: #e2e8f0; border: none; border-radius: 6px; cursor: pointer; }
@@ -69,7 +86,7 @@
         <!-- Login form -->
         <div id="login-form">
           <input type="text" id="auth-phone" class="input" placeholder="Phone Number (e.g. 9876543210)" />
-          <input type="password" id="auth-pass" class="input" placeholder="Password" />
+          <div class="pwd-wrap"><input type="password" id="auth-pass" class="input" placeholder="Password" /><button type="button" class="pwd-toggle" onclick="togglePwd('auth-pass', this)">Show</button></div>
           <div id="auth-msg" class="msg" style="color:#f87171;"></div>
           <button class="btn blue" style="width:100%; margin-bottom:8px;" onclick="authSubmit('login')">Login</button>
           <button class="btn green" style="width:100%;" onclick="showSignup()">Create New Account (₹50 Demo Bonus)</button>
@@ -77,8 +94,8 @@
         <!-- Signup form (opens when Create New Account is tapped) -->
         <div id="signup-form" style="display:none;">
           <input type="text" id="su-phone" class="input" placeholder="Mobile Number (10 Digits)" />
-          <input type="password" id="su-pass" class="input" placeholder="Set Password (Min 4 Characters)" />
-          <input type="password" id="su-confirm" class="input" placeholder="Confirm Password" />
+          <div class="pwd-wrap"><input type="password" id="su-pass" class="input" placeholder="Set Password (Min 4 Characters)" /><button type="button" class="pwd-toggle" onclick="togglePwd('su-pass', this)">Show</button></div>
+          <div class="pwd-wrap"><input type="password" id="su-confirm" class="input" placeholder="Confirm Password" /><button type="button" class="pwd-toggle" onclick="togglePwd('su-confirm', this)">Show</button></div>
           <div id="signup-msg" class="msg" style="color:#f87171;"></div>
           <button class="btn green" style="width:100%; margin-bottom:8px;" onclick="signupSubmit()">Create Account (₹50 Bonus)</button>
           <button class="btn" style="width:100%; background:#334155;" onclick="showLogin()">Back to Login</button>
@@ -143,27 +160,55 @@
 
         <!-- TAB 2: WALLET -->
         <div id="tab-wallet" class="tab-page">
-          <div class="card upi-box">
-            <h4 style="margin-bottom:10px;">Pay via UPI</h4>
-            <div class="upi-qr"><img src="/upi-qr.jpg" alt="UPI QR code" /></div>
-            <div class="upi-id-row">
-              <span class="upi-id">6001601257@mbk</span>
-              <button class="copy-btn" type="button" onclick="copyUPI(this)">Copy</button>
-            </div>
-            <p class="upi-note">Scan the QR code or pay to the UPI ID above. <b>After making the payment, enter the UTR number below and tap Submit.</b></p>
+          <div class="bal-row">
+            <div class="bal-card"><div class="bal-label">Cash Balance</div><div class="bal-amt">₹<span id="wal-balance">0</span></div></div>
+            <div class="bal-card"><div class="bal-label">Withdrawable</div><div class="bal-amt">₹<span id="wal-withdrawable">0</span></div><div class="bal-sub" id="wal-withdraw-note"></div></div>
           </div>
 
           <div class="card">
-            <h4 style="margin-bottom:10px;">Deposit / Withdrawal Request</h4>
-            <select id="txn-type" class="input">
-              <option value="deposit">Deposit Money</option>
-              <option value="withdrawal">Withdraw Money</option>
-            </select>
-            <input type="number" id="txn-amount" class="input" placeholder="Amount (Min ₹100)" />
-            <input type="text" id="txn-ref" class="input" placeholder="UTR Number (Deposit) / UPI ID (Withdraw)" />
-            <button class="btn blue" style="width:100%;" onclick="submitWallet()">Submit Request</button>
+            <div class="seg-toggle">
+              <button type="button" id="seg-deposit" class="seg-btn active" onclick="setTxnType('deposit')">Deposit</button>
+              <button type="button" id="seg-withdraw" class="seg-btn" onclick="setTxnType('withdrawal')">Withdraw</button>
+            </div>
+            <input type="hidden" id="txn-type" value="deposit" />
+            <p id="amt-rule" style="font-size:13px;color:#94a3b8;">Deposit amount: Min: ₹100 Max: ₹50,000</p>
+            <div style="display:flex;align-items:center;gap:8px;margin:10px 0;">
+              <span style="font-size:18px;font-weight:bold;">₹</span>
+              <input type="number" id="txn-amount" class="input" style="margin-bottom:0;" placeholder="300" />
+            </div>
+            <div id="deposit-extra">
+              <div class="amt-chips">
+                <button type="button" class="amt-chip" onclick="pickAmount(100, this)">₹100</button>
+                <button type="button" class="amt-chip" onclick="pickAmount(200, this)">₹200</button>
+                <button type="button" class="amt-chip" onclick="pickAmount(300, this)">₹300</button>
+                <button type="button" class="amt-chip" onclick="pickAmount(500, this)">₹500</button>
+                <button type="button" class="amt-chip" onclick="pickAmount(1000, this)">₹1,000</button>
+                <button type="button" class="amt-chip" onclick="pickAmount(2000, this)">₹2,000</button>
+              </div>
+              <p style="font-size:13px;color:#94a3b8;">Payment methods *</p>
+              <div class="pay-method">
+                <div><b>UPI-QR</b><div style="font-size:12px;color:#94a3b8;">Scan &amp; pay via any UPI app</div></div>
+                <span class="pm-check">&#10003; Selected</span>
+              </div>
+              <div style="text-align:center;margin:10px 0;">
+                <div class="upi-qr"><img src="/upi-qr.jpg" alt="UPI QR code" /></div>
+                <div class="upi-id-row">
+                  <span class="upi-id">6001601257@mbk</span>
+                  <button class="copy-btn" type="button" onclick="copyUPI(this)">Copy</button>
+                </div>
+                <p class="upi-note">Scan the QR code or pay to the UPI ID above. <b>After making the payment, enter the UTR number below and tap Pay now.</b></p>
+              </div>
+            </div>
+            <input type="text" id="txn-ref" class="input" placeholder="UTR Number (after payment)" />
+            <button class="btn blue" style="width:100%;" id="wallet-submit-btn" onclick="submitWallet()">Pay now</button>
             <div id="wallet-msg" class="msg"></div>
             <p style="font-size:12px;color:#94a3b8;margin-top:8px;">Withdrawal ke liye deposit + bonus ke barabar bets lagane honge: ₹<span id="wager-required">50</span> (deposit + ₹50 bonus). Bets lagaye: ₹<span id="wagered">0</span> / ₹<span id="wager-required2">50</span>.</p>
+            <div class="dep-tips">
+              <b style="color:#e2e8f0;">Deposit tips:</b><br />
+              1. Har deposit admin approval ke baad 1-5 minute me credit hota hai.<br />
+              2. Payment ke baad UTR number daal kar Pay now dabao.<br />
+              3. 30 minute me deposit na aaye to admin se contact karo.
+            </div>
           </div>
 
           <div class="card">
@@ -325,6 +370,10 @@
       document.getElementById('wagered').innerText = data.user.wagered || 0;
       document.getElementById('wager-required').innerText = (data.user.deposited || 0) + 50;
       document.getElementById('wager-required2').innerText = (data.user.deposited || 0) + 50;
+      document.getElementById('wal-balance').innerText = data.user.balance;
+      const wagerOk = (data.user.wagered || 0) >= (data.user.deposited || 0) + 50;
+      document.getElementById('wal-withdrawable').innerText = wagerOk ? data.user.balance : 0;
+      document.getElementById('wal-withdraw-note').innerText = wagerOk ? 'Ready to withdraw' : ('₹' + (((data.user.deposited || 0) + 50) - (data.user.wagered || 0)) + ' bets aur lagao');
       const is1m = gameMode === '1min';
       const period = is1m ? data.period1m : data.period;
       const tl = is1m ? data.timeLeft1m : data.timeLeft;
@@ -363,11 +412,37 @@
       if (res.ok) fetchState();
     }
 
+    function togglePwd(id, btn) {
+      const el = document.getElementById(id);
+      const show = el.type === 'password';
+      el.type = show ? 'text' : 'password';
+      btn.innerText = show ? 'Hide' : 'Show';
+    }
+
+    function pickAmount(amt, btn) {
+      document.getElementById('txn-amount').value = amt;
+      document.querySelectorAll('.amt-chip').forEach(c => c.classList.remove('sel'));
+      if (btn) btn.classList.add('sel');
+    }
+
+    function setTxnType(t) {
+      document.getElementById('txn-type').value = t;
+      document.getElementById('seg-deposit').classList.toggle('active', t === 'deposit');
+      document.getElementById('seg-withdraw').classList.toggle('active', t === 'withdrawal');
+      document.getElementById('deposit-extra').style.display = t === 'deposit' ? 'block' : 'none';
+      document.getElementById('amt-rule').innerText = t === 'deposit' ? 'Deposit amount: Min: ₹100 Max: ₹50,000' : 'Withdraw amount: Min: ₹100';
+      document.getElementById('txn-ref').placeholder = t === 'deposit' ? 'UTR Number (after payment)' : 'Your UPI ID (payment milega)';
+      document.getElementById('wallet-submit-btn').innerText = t === 'deposit' ? 'Pay now' : 'Withdraw';
+    }
+
     async function submitWallet() {
       const type = document.getElementById('txn-type').value;
       const amount = document.getElementById('txn-amount').value;
       const reference = document.getElementById('txn-ref').value.trim();
       const msg = document.getElementById('wallet-msg');
+      const amt = Number(amount);
+      if (!amt || amt < 100) { msg.style.color = '#f87171'; msg.innerText = 'Minimum amount ₹100 hai'; return; }
+      if (amt > 50000) { msg.style.color = '#f87171'; msg.innerText = 'Maximum amount ₹50,000 hai'; return; }
       const res = await fetch('/api/wallet/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-token': token },
