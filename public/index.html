@@ -110,7 +110,9 @@
     .badge-lost { color: #f87171; }
     .badge-pending { color: #facc15; }
     .upi-box { text-align: center; }
-    .upi-qr img { width: 240px; max-width: 85%; border-radius: 8px; background: #fff; padding: 6px; }
+    .upi-qr .qr-wrap { position: relative; display: inline-block; background: #fff; border-radius: 8px; padding: 6px; }
+    .upi-qr .qr-img { width: 240px; max-width: 85vw; display: block; }
+    .upi-qr .qr-logo { position: absolute; width: 54px; height: 54px; left: 50%; top: 50%; transform: translate(-50%, -50%); }
     .upi-id-row { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 10px 0 6px; }
     .upi-id { font-size: 17px; font-weight: 700; }
     .copy-btn { padding: 6px 12px; background: #0284c7; color: #fff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
@@ -232,7 +234,7 @@
                   <span class="upi-id">6001601257@mbk</span>
                   <button class="copy-btn" type="button" onclick="copyUPI(this)">Copy</button>
                 </div>
-                <p class="upi-note">Scan the QR code or pay to the UPI ID above. Enter the amount in your UPI app after scanning. <b>After making the payment, enter the UTR number below and tap Pay now.</b></p>
+                <p class="upi-note">Scan the QR code — the amount fills automatically in your UPI app. <b>After making the payment, enter the UTR number below and tap Pay now.</b></p>
               </div>
             </div>
             <input type="text" id="txn-ref" class="input" placeholder="UTR Number (after payment)" />
@@ -736,14 +738,17 @@
       renderDepositQR();
     }
 
-    // Deposit QR: the user's own MobiKwik receive QR (upi://pay?pa=6001601257@mbk&pn=Tainuj%20Boruah).
-    // STATIC by his order (2026-11-25 00:54 "Ye wala qr use karo") — it never changes
-    // with the amount, so it scans reliably from a screenshot. Trade-off: the amount
-    // is NOT pre-filled; the user types it in the UPI app after scanning.
+    // Deposit QR: server-generated PNG (crisp, like MobiKwik's own QR) with the
+    // selected amount embedded, so UPI apps pre-fill the amount on scan. The M
+    // logo is overlaid in the centre (same look as the user's MobiKwik QR).
     function renderDepositQR() {
       const box = document.getElementById('qr-box');
       if (!box) return;
-      box.innerHTML = '<img src="/upi-qr.jpg" alt="UPI QR code" />';
+      const amt = Math.floor(Number(document.getElementById('txn-amount').value) || 0);
+      const src = amt >= 100 ? '/api/deposit-qr?amount=' + amt : '/api/deposit-qr';
+      const img = document.getElementById('deposit-qr-img');
+      if (img) { img.src = src; return; }
+      box.innerHTML = '<div class="qr-wrap"><img class="qr-img" id="deposit-qr-img" src="' + src + '" alt="UPI QR code" /><img class="qr-logo" src="/mb-logo.png" alt="" /></div>';
     }
 
     function setTxnType(t) {
