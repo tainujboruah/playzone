@@ -1,1 +1,277 @@
-placeholder
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="theme-color" content="#0284c7" />
+  <link rel="manifest" href="/manifest.json" />
+  <title>PlayZone - Game App</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+    body { background: #0b1120; color: #f8fafc; display: flex; justify-content: center; min-height: 100vh; }
+    .container { width: 100%; max-width: 440px; background: #1e293b; min-height: 100vh; padding-bottom: 75px; position: relative; }
+    .header { background: linear-gradient(135deg, #0284c7, #1d4ed8); padding: 18px; border-radius: 0 0 18px 18px; }
+    .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .wallet-bal { font-size: 28px; font-weight: bold; }
+    .content { padding: 15px; }
+    .card { background: #0f172a; padding: 14px; border-radius: 12px; margin-bottom: 14px; border: 1px solid #334155; }
+    .round-row { display: flex; justify-content: space-between; align-items: center; }
+    .timer { font-size: 28px; font-weight: bold; color: #facc15; }
+    .timer.locked { color: #ef4444; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+    .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 12px; }
+    .btn { padding: 11px; border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; font-size: 14px; }
+    .green { background: #16a34a; }
+    .violet { background: #9333ea; }
+    .red { background: #dc2626; }
+    .blue { background: #0284c7; }
+    .num-btn { background: #334155; color: #fff; border: none; padding: 12px 0; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    .input { width: 100%; padding: 11px; border-radius: 8px; border: 1px solid #475569; background: #1e293b; color: white; margin-bottom: 10px; }
+    .chips { display: flex; gap: 6px; margin-bottom: 10px; }
+    .chip { flex: 1; padding: 7px; background: #334155; color: #e2e8f0; border: none; border-radius: 6px; cursor: pointer; }
+    .msg { font-size: 13px; min-height: 18px; margin: 6px 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 8px 4px; text-align: center; border-bottom: 1px solid #334155; }
+    th { color: #94a3b8; }
+    .dot { display: inline-block; width: 11px; height: 11px; border-radius: 50%; }
+    .tab-page { display: none; }
+    .tab-page.active { display: block; }
+    .bottom-nav { position: fixed; bottom: 0; width: 100%; max-width: 440px; background: #0f172a; border-top: 1px solid #334155; display: flex; }
+    .nav-item { flex: 1; padding: 14px 5px; background: none; border: none; color: #94a3b8; font-weight: 600; cursor: pointer; }
+    .nav-item.active { color: #38bdf8; border-top: 2px solid #38bdf8; }
+    .auth-screen { padding: 30px 20px; display: flex; flex-direction: column; justify-content: center; min-height: 100vh; }
+    .badge-won { color: #4ade80; font-weight: bold; }
+    .badge-lost { color: #f87171; }
+    .badge-pending { color: #facc15; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Auth View -->
+    <div id="auth-view" class="auth-screen">
+      <h2 style="text-align:center; margin-bottom:20px; color:#38bdf8;">PlayZone Login / Signup</h2>
+      <div class="card">
+        <input type="text" id="auth-phone" class="input" placeholder="Phone Number (e.g. 9876543210)" />
+        <input type="password" id="auth-pass" class="input" placeholder="Password" />
+        <div id="auth-msg" class="msg" style="color:#f87171;"></div>
+        <button class="btn blue" style="width:100%; margin-bottom:8px;" onclick="authSubmit('login')">Login</button>
+        <button class="btn green" style="width:100%;" onclick="authSubmit('register')">Create New Account (₹500 Demo Bonus)</button>
+      </div>
+    </div>
+
+    <!-- Main App View -->
+    <div id="app-view" style="display:none;">
+      <div class="header">
+        <div class="header-top">
+          <strong id="user-label">USR</strong>
+          <button onclick="logout()" style="background:rgba(255,255,255,0.2); border:none; color:#fff; padding:5px 10px; border-radius:6px; cursor:pointer;">Logout</button>
+        </div>
+        <small>Wallet Balance</small>
+        <div class="wallet-bal">₹<span id="balance">0</span></div>
+      </div>
+
+      <div class="content">
+        <!-- TAB 1: GAME -->
+        <div id="tab-game" class="tab-page active">
+          <div class="card round-row">
+            <div>
+              <small style="color:#94a3b8;">WinGo 30s Period</small>
+              <div style="font-weight:bold; font-size:16px;" id="period">---</div>
+              <small id="bet-status" style="color:#4ade80;">Open</small>
+            </div>
+            <div class="timer" id="timer">00:30</div>
+          </div>
+
+          <div class="card">
+            <input type="number" id="bet-amount" class="input" value="100" min="10" placeholder="Enter Amount" />
+            <div class="chips">
+              <button class="chip" onclick="setAmt(10)">₹10</button>
+              <button class="chip" onclick="setAmt(100)">₹100</button>
+              <button class="chip" onclick="setAmt(500)">₹500</button>
+              <button class="chip" onclick="setAmt(1000)">₹1000</button>
+            </div>
+            <div class="grid-3">
+              <button class="btn green" onclick="placeBet('color', 'green')">Green 2x</button>
+              <button class="btn violet" onclick="placeBet('color', 'violet')">Violet 4.5x</button>
+              <button class="btn red" onclick="placeBet('color', 'red')">Red 2x</button>
+            </div>
+            <div class="grid-5" id="num-grid"></div>
+            <div id="game-msg" class="msg"></div>
+          </div>
+
+          <div class="card">
+            <h4 style="margin-bottom:8px;">Game History</h4>
+            <table>
+              <thead><tr><th>Period</th><th>Number</th><th>Color</th></tr></thead>
+              <tbody id="history-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 2: WALLET -->
+        <div id="tab-wallet" class="tab-page">
+          <div class="card">
+            <h4 style="margin-bottom:10px;">Deposit / Withdrawal Request</h4>
+            <select id="txn-type" class="input">
+              <option value="deposit">Deposit Money</option>
+              <option value="withdrawal">Withdraw Money</option>
+            </select>
+            <input type="number" id="txn-amount" class="input" placeholder="Amount (Min ₹100)" />
+            <input type="text" id="txn-ref" class="input" placeholder="UTR Number (Deposit) / UPI ID (Withdraw)" />
+            <button class="btn blue" style="width:100%;" onclick="submitWallet()">Submit Request</button>
+            <div id="wallet-msg" class="msg"></div>
+          </div>
+
+          <div class="card">
+            <h4 style="margin-bottom:8px;">My Transactions</h4>
+            <table>
+              <thead><tr><th>Type</th><th>Amount</th><th>Status</th></tr></thead>
+              <tbody id="txn-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 3: MY BETS -->
+        <div id="tab-bets" class="tab-page">
+          <div class="card">
+            <h4 style="margin-bottom:8px;">My Bet History</h4>
+            <table>
+              <thead><tr><th>Period</th><th>Pick</th><th>Amt</th><th>Result</th></tr></thead>
+              <tbody id="mybets-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom-nav">
+        <button class="nav-item active" onclick="switchTab('tab-game', this)">Game</button>
+        <button class="nav-item" onclick="switchTab('tab-wallet', this)">Wallet</button>
+        <button class="nav-item" onclick="switchTab('tab-bets', this)">My Bets</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let token = localStorage.getItem('pz_token');
+    let pollInterval = null;
+
+    // Build 0-9 buttons
+    const numGrid = document.getElementById('num-grid');
+    for (let i = 0; i <= 9; i++) {
+      const b = document.createElement('button');
+      b.className = 'num-btn';
+      b.innerText = i;
+      b.onclick = () => placeBet('number', i);
+      numGrid.appendChild(b);
+    }
+
+    function setAmt(v) { document.getElementById('bet-amount').value = v; }
+
+    function switchTab(id, btn) {
+      document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    async function authSubmit(mode) {
+      const phone = document.getElementById('auth-phone').value.trim();
+      const password = document.getElementById('auth-pass').value.trim();
+      const res = await fetch(`/api/auth/${mode}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, password })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        document.getElementById('auth-msg').innerText = data.error;
+        return;
+      }
+      token = data.token;
+      localStorage.setItem('pz_token', token);
+      initApp();
+    }
+
+    function logout() {
+      localStorage.removeItem('pz_token');
+      token = null;
+      clearInterval(pollInterval);
+      document.getElementById('app-view').style.display = 'none';
+      document.getElementById('auth-view').style.display = 'flex';
+    }
+
+    async function fetchState() {
+      if (!token) return;
+      const res = await fetch('/api/state', { headers: { 'x-token': token } });
+      if (res.status === 401 || res.status === 403) return logout();
+      const data = await res.json();
+
+      document.getElementById('user-label').innerText = `${data.user.id} (${data.user.phone})`;
+      document.getElementById('balance').innerText = data.user.balance;
+      document.getElementById('period').innerText = data.period;
+
+      const timer = document.getElementById('timer');
+      timer.innerText = '00:' + String(data.timeLeft).padStart(2, '0');
+      timer.className = data.timeLeft <= 5 ? 'timer locked' : 'timer';
+      document.getElementById('bet-status').innerText = data.timeLeft <= 5 ? 'Betting Locked' : 'Betting Open';
+
+      document.getElementById('history-body').innerHTML = data.history.map(h =>
+        `<tr><td>${h.period}</td><td><strong>${h.number}</strong></td><td><span class="dot ${h.color}"></span></td></tr>`
+      ).join('');
+
+      document.getElementById('txn-body').innerHTML = data.myTxns.map(t =>
+        `<tr><td>${t.type.toUpperCase()}</td><td>₹${t.amount}</td><td class="badge-${t.status === 'approved' ? 'won' : t.status === 'rejected' ? 'lost' : 'pending'}">${t.status}</td></tr>`
+      ).join('') || '<tr><td colspan="3">No transactions yet</td></tr>';
+
+      document.getElementById('mybets-body').innerHTML = data.myBets.map(b =>
+        `<tr><td>${b.period}</td><td>${b.choice.toUpperCase()}</td><td>₹${b.amount}</td><td class="badge-${b.status}">${b.status === 'won' ? '+₹' + b.payout : b.status}</td></tr>`
+      ).join('') || '<tr><td colspan="4">No bets yet</td></tr>';
+    }
+
+    async function placeBet(type, choice) {
+      const amount = document.getElementById('bet-amount').value;
+      const msg = document.getElementById('game-msg');
+      const res = await fetch('/api/bet', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-token': token },
+        body: JSON.stringify({ type, choice, amount })
+      });
+      const data = await res.json();
+      msg.style.color = res.ok ? '#4ade80' : '#f87171';
+      msg.innerText = res.ok ? `Bet placed on ${String(choice).toUpperCase()} (₹${amount})` : data.error;
+      if (res.ok) fetchState();
+    }
+
+    async function submitWallet() {
+      const type = document.getElementById('txn-type').value;
+      const amount = document.getElementById('txn-amount').value;
+      const reference = document.getElementById('txn-ref').value.trim();
+      const msg = document.getElementById('wallet-msg');
+      const res = await fetch('/api/wallet/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-token': token },
+        body: JSON.stringify({ type, amount, reference })
+      });
+      const data = await res.json();
+      msg.style.color = res.ok ? '#4ade80' : '#f87171';
+      msg.innerText = res.ok ? data.message : data.error;
+      if (res.ok) {
+        document.getElementById('txn-amount').value = '';
+        document.getElementById('txn-ref').value = '';
+        fetchState();
+      }
+    }
+
+    function initApp() {
+      if (!token) return;
+      document.getElementById('auth-view').style.display = 'none';
+      document.getElementById('app-view').style.display = 'block';
+      fetchState();
+      clearInterval(pollInterval);
+      pollInterval = setInterval(fetchState, 1000);
+    }
+
+    if (token) initApp();
+  </script>
+</body>
+</html>

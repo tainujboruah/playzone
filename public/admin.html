@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PlayZone - Live Admin Panel</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+    body { background: #0f172a; color: #f8fafc; padding: 20px; }
+    .login-box { max-width: 360px; margin: 80px auto; background: #1e293b; padding: 24px; border-radius: 12px; border: 1px solid #334155; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .card { background: #1e293b; padding: 18px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 20px; overflow-x: auto; }
+    .stat-num { font-size: 26px; font-weight: bold; color: #38bdf8; margin-top: 6px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #334155; }
+    th { color: #94a3b8; }
+    .btn { padding: 7px 12px; border: none; border-radius: 6px; color: #fff; font-weight: 600; cursor: pointer; margin-right: 4px; }
+    .green { background: #16a34a; }
+    .red { background: #dc2626; }
+    .blue { background: #0284c7; }
+    input, select { padding: 10px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #fff; }
+  </style>
+</head>
+<body>
+  <div id="admin-login" class="login-box">
+    <h2 style="margin-bottom:15px;">Admin Login</h2>
+    <input type="password" id="admin-key-input" placeholder="Enter Admin Key (ADMIN123)" style="width:100%; margin-bottom:12px;" />
+    <button class="btn blue" style="width:100%;" onclick="loginAdmin()">Unlock Panel</button>
+  </div>
+
+  <div id="admin-panel" style="display:none; max-width:1100px; margin:auto;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+      <h1>PlayZone Live Admin Panel</h1>
+      <div>Period: <strong id="adm-period">---</strong> | Timer: <strong id="adm-timer" style="color:#facc15;">--</strong>s</div>
+    </div>
+
+    <div class="grid">
+      <div class="card"><div>Total Users</div><div class="stat-num" id="st-users">0</div></div>
+      <div class="card"><div>Pending Deposits</div><div class="stat-num">₹<span id="st-dep">0</span></div></div>
+      <div class="card"><div>Pending Withdrawals</div><div class="stat-num">₹<span id="st-wd">0</span></div></div>
+      <div class="card"><div>Live Round Bets</div><div class="stat-num" id="st-bets">0</div></div>
+    </div>
+
+    <div class="card">
+      <h3>Next Round Result Control</h3>
+      <div style="margin-top:12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <input type="number" id="next-num" min="0" max="9" placeholder="Number (0-9)" />
+        <button class="btn blue" onclick="setNextResult()">Set Result</button>
+        <span id="ctrl-status" style="color:#4ade80; font-size:14px;"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Deposit & Withdrawal Requests</h3>
+      <table>
+        <thead><tr><th>ID</th><th>User</th><th>Type</th><th>Amount</th><th>UTR / UPI</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="adm-txns"></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>Registered Users</h3>
+      <table>
+        <thead><tr><th>User ID</th><th>Phone</th><th>Balance</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="adm-users"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    let adminKey = sessionStorage.getItem('pz_admin_key') || '';
+
+    async function loginAdmin() {
+      adminKey = document.getElementById('admin-key-input').value.trim();
+      const res = await fetch('/api/admin/overview', { headers: { 'x-admin-key': adminKey } });
+      if (!res.ok) return alert('Invalid Admin Key');
+      sessionStorage.setItem('pz_admin_key', adminKey);
+      document.getElementById('admin-login').style.display = 'none';
+      document.getElementById('admin-panel').style.display = 'block';
+      loadOverview();
+      setInterval(loadOverview, 2000);
+    }
+
+    async function loadOverview() {
+      const res = await fetch('/api/admin/overview', { headers: { 'x-admin-key': adminKey } });
+      if (!res.ok) return;
+      const d = await res.json();
+
+      document.getElementById('adm-period').innerText = d.currentPeriod;
+      document.getElementById('adm-timer').innerText = d.timeLeft;
+      document.getElementById('st-users').innerText = d.stats.totalUsers;
+      document.getElementById('st-dep').innerText = d.stats.pendingDeposits;
+      document.getElementById('st-wd').innerText = d.stats.pendingWithdrawals;
+      document.getElementById('st-bets').innerText = d.stats.activeBetsCount;
+
+      document.getElementById('adm-txns').innerHTML = d.transactions.map(t => `
+        <tr>
+          <td>${t.id}</td><td>${t.phone}</td><td>${t.type.toUpperCase()}</td>
+          <td>₹${t.amount}</td><td>${t.reference}</td><td>${t.status}</td>
+          <td>${t.status === 'pending'
+            ? `<button class="btn green" onclick="processTxn('${t.id}','approved')">Approve</button>
+               <button class="btn red" onclick="processTxn('${t.id}','rejected')">Reject</button>`
+            : '-'}</td>
+        </tr>`).join('') || '<tr><td colspan="7">No requests</td></tr>';
+
+      document.getElementById('adm-users').innerHTML = d.users.map(u => `
+        <tr>
+          <td>${u.id}</td><td>${u.phone}</td><td>₹${u.balance}</td>
+          <td>${u.blocked ? 'Blocked' : 'Active'}</td>
+          <td><button class="btn red" onclick="toggleUser('${u.id}')">${u.blocked ? 'Unblock' : 'Block'}</button></td>
+        </tr>`).join('') || '<tr><td colspan="5">No users</td></tr>';
+    }
+
+    async function processTxn(txnId, status) {
+      await fetch('/api/admin/txn', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
+        body: JSON.stringify({ txnId, status })
+      });
+      loadOverview();
+    }
+
+    async function toggleUser(userId) {
+      await fetch('/api/admin/user-toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
+        body: JSON.stringify({ userId })
+      });
+      loadOverview();
+    }
+
+    async function setNextResult() {
+      const number = document.getElementById('next-num').value;
+      const res = await fetch('/api/admin/set-result', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
+        body: JSON.stringify({ number })
+      });
+      const data = await res.json();
+      document.getElementById('ctrl-status').innerText = res.ok ? data.message : data.error;
+    }
+
+    if (adminKey) {
+      document.getElementById('admin-key-input').value = adminKey;
+      loginAdmin();
+    }
+  </script>
+</body>
+</html>
