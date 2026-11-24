@@ -139,7 +139,9 @@ app.post('/api/auth/register', (req, res) => {
     id: 'USR' + Math.floor(1000 + Math.random() * 9000),
     phone,
     passwordHash: hashPassword(password),
-    balance: 500, // Demo welcome balance
+    balance: 50, // Demo welcome balance
+    wagered: 0,
+    deposited: 0,
     blocked: false,
     createdAt: new Date().toISOString()
   };
@@ -172,7 +174,7 @@ app.get('/api/state', requireAuth, (req, res) => {
   res.json({
     period: db.currentPeriod,
     timeLeft,
-    user: { id: req.user.id, phone: req.user.phone, balance: req.user.balance },
+    user: { id: req.user.id, phone: req.user.phone, balance: req.user.balance, wagered: req.user.wagered || 0, deposited: req.user.deposited || 0 },
     history: db.history.slice(0, 15),
     myBets,
     myTxns
@@ -184,10 +186,11 @@ app.post('/api/bet', requireAuth, (req, res) => {
   const betAmount = Number(amount);
 
   if (timeLeft <= 5) return res.status(400).json({ error: 'Last 5 sec me betting lock hoti hai' });
-  if (!betAmount || betAmount < 10) return res.status(400).json({ error: 'Minimum bet ₹10 hai' });
+  if (!betAmount || betAmount < 1) return res.status(400).json({ error: 'Minimum bet ₹1 hai' });
   if (betAmount > req.user.balance) return res.status(400).json({ error: 'Wallet balance kam hai' });
 
   req.user.balance -= betAmount;
+  req.user.wagered = (req.user.wagered || 0) + betAmount;
   const bet = {
     id: 'BET' + Date.now(),
     userId: req.user.id,
@@ -217,6 +220,10 @@ app.post('/api/wallet/request', requireAuth, (req, res) => {
 
   if (type === 'withdrawal') {
     if (amt > req.user.balance) return res.status(400).json({ error: 'Balance kam hai' });
+    const wagered = req.user.wagered || 0;
+    const deposited = req.user.deposited || 0;
+    const withdrawable = wagered >= 50 ? req.user.balance : deposited;
+    if (amt > withdrawable) return res.status(400).json({ error: `₹50 bonus withdraw karne ke liye ₹50 ke bets lagao — abhi ₹${wagered} ke bets lage hain. Apne deposit ke ₹${deposited} kabhi bhi withdraw kar sakte ho.` });
     req.user.balance -= amt; // Hold balance until approved/rejected
   }
 
@@ -271,7 +278,7 @@ app.post('/api/admin/txn', requireAdmin, (req, res) => {
   txn.status = status;
   const user = db.users.find((u) => u.id === txn.userId);
   if (user) {
-    if (txn.type === 'deposit' && status === 'approved') user.balance += txn.amount;
+    if (txn.type === 'deposit' && status === 'approved') { user.balance += txn.amount; user.deposited = (user.deposited || 0) + txn.amount; }
     if (txn.type === 'withdrawal' && status === 'rejected') user.balance += txn.amount;
   }
   saveDB();
